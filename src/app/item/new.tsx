@@ -1,22 +1,55 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { emptyItemForm, ItemForm, type ItemFormValues } from '@/components/ItemForm';
+import { useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  applySuggestion,
+  emptyItemForm,
+  fieldsFromForm,
+  ItemForm,
+  type ItemFormValues,
+} from '@/components/ItemForm';
 import { Button } from '@/components/ui';
+import { suggestTags } from '@/lib/ai';
 import { useAuth } from '@/lib/auth';
-import { createItem, parseColours } from '@/lib/items';
-import { deletePhoto, pickPhoto, uploadPhoto, type PickedPhoto } from '@/lib/photos';
+import { createItem } from '@/lib/items';
+import { deletePhoto, pickPhoto, uploadPhoto, type PreparedPhoto } from '@/lib/photos';
+
+type AiState = 'idle' | 'working' | 'done' | 'failed';
 
 export default function NewItem() {
   const { session } = useAuth();
-  const [photo, setPhoto] = useState<PickedPhoto | null>(null);
+  const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [values, setValues] = useState<ItemFormValues>(emptyItemForm);
+  const [ai, setAi] = useState<AiState>('idle');
   const [saving, setSaving] = useState(false);
+  const run = useRef(0); // ignore results for a photo that was since replaced
+
+  async function autoTag(p: PreparedPhoto) {
+    const id = ++run.current;
+    setAi('working');
+    try {
+      const s = await suggestTags(p);
+      if (id !== run.current) return;
+      setValues((v) => applySuggestion(v, s));
+      setAi('done');
+    } catch (e) {
+      if (id !== run.current) return;
+      console.warn('Auto-tag failed', e);
+      setAi('failed');
+    }
+  }
 
   async function choose(source: 'camera' | 'library') {
-    const picked = await pickPhoto(source);
-    if (picked) setPhoto(picked);
+    try {
+      const picked = await pickPhoto(source);
+      if (!picked) return;
+      setPhoto(picked);
+      setValues(emptyItemForm); // new photo, fresh suggestions
+      autoTag(picked);
+    } catch (e) {
+      Alert.alert('Could not use photo', e instanceof Error ? e.message : String(e));
+    }
   }
 
   async function save() {
@@ -25,13 +58,7 @@ export default function NewItem() {
     let key: string | null = null;
     try {
       key = await uploadPhoto(session.user.id, photo);
-      await createItem({
-        photo_key: key,
-        name: values.name.trim() || null,
-        type: values.type,
-        colours: parseColours(values.colours),
-        notes: values.notes.trim() || null,
-      });
+      await createItem({ ...fieldsFromForm(values), photo_key: key });
       router.back();
     } catch (e) {
       if (key) await deletePhoto(key); // don't leave an orphaned photo
@@ -54,6 +81,23 @@ export default function NewItem() {
         <Button title="Library" variant="secondary" onPress={() => choose('library')} />
       </View>
 
+      {ai === 'working' && (
+        <View style={styles.banner}>
+          <ActivityIndicator size="small" />
+          <Text style={styles.bannerText}>Reading the photo… you can start typing.</Text>
+        </View>
+      )}
+      {ai === 'done' && (
+        <View style={styles.banner}>
+          <Text style={styles.bannerText}>Filled in from the photo. Edit or add anything.</Text>
+        </View>
+      )}
+      {ai === 'failed' && photo && (
+        <Pressable style={[styles.banner, styles.bannerWarn]} onPress={() => autoTag(photo)}>
+          <Text style={styles.bannerText}>Couldn't read the photo. Tap to try again, or fill in below.</Text>
+        </Pressable>
+      )}
+
       <ItemForm values={values} onChange={setValues} />
 
       <View style={[styles.row, styles.saveRow]}>
@@ -70,4 +114,14 @@ const styles = StyleSheet.create({
   emptyText: { color: '#888' },
   row: { flexDirection: 'row', gap: 12 },
   saveRow: { marginTop: 16 },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#f4f4f4',
+    borderRadius: 10,
+    padding: 12,
+  },
+  bannerWarn: { backgroundColor: '#fdf2e9' },
+  bannerText: { color: '#333', flexShrink: 1 },
 });

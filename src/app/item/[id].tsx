@@ -2,9 +2,9 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
-import { ItemForm, type ItemFormValues } from '@/components/ItemForm';
+import { fieldsFromForm, formFromItem, ItemForm, type ItemFormValues } from '@/components/ItemForm';
 import { Button } from '@/components/ui';
-import { deleteItem, getItem, parseColours, updateItem, type Item } from '@/lib/items';
+import { deleteItem, getItem, updateItem, type Item } from '@/lib/items';
 import { deletePhoto, photoUrls } from '@/lib/photos';
 
 export default function EditItem() {
@@ -19,12 +19,7 @@ export default function EditItem() {
       try {
         const it = await getItem(id);
         setItem(it);
-        setValues({
-          name: it.name ?? '',
-          type: it.type,
-          colours: it.colours.join(', '),
-          notes: it.notes ?? '',
-        });
+        setValues(formFromItem(it));
         if (it.photo_key) setUrl((await photoUrls([it.photo_key]))[it.photo_key] ?? null);
       } catch (e) {
         Alert.alert('Could not load item', e instanceof Error ? e.message : String(e));
@@ -37,12 +32,7 @@ export default function EditItem() {
     if (!values) return;
     setBusy('save');
     try {
-      await updateItem(id, {
-        name: values.name.trim() || null,
-        type: values.type,
-        colours: parseColours(values.colours),
-        notes: values.notes.trim() || null,
-      });
+      await updateItem(id, fieldsFromForm(values));
       router.back();
     } catch (e) {
       Alert.alert('Could not save', e instanceof Error ? e.message : String(e));

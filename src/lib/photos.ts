@@ -6,10 +6,11 @@ import { Alert } from 'react-native';
 import { PHOTO_JPEG_QUALITY, PHOTO_MAX_WIDTH, PHOTO_URL_TTL, STORAGE_BUCKET } from '@/config';
 import { supabase } from './supabase';
 
-export type PickedPhoto = { uri: string; width: number };
+/** A photo that has already been resized and compressed, ready for AI tagging and upload. */
+export type PreparedPhoto = { uri: string; base64: string };
 
-/** Opens the camera or photo library. Returns null if the user cancels. */
-export async function pickPhoto(source: 'camera' | 'library'): Promise<PickedPhoto | null> {
+/** Opens the camera or photo library, then resizes and compresses the photo. Null if cancelled. */
+export async function pickPhoto(source: 'camera' | 'library'): Promise<PreparedPhoto | null> {
   const perm =
     source === 'camera'
       ? await ImagePicker.requestCameraPermissionsAsync()
@@ -24,14 +25,10 @@ export async function pickPhoto(source: 'camera' | 'library'): Promise<PickedPho
       ? await ImagePicker.launchCameraAsync(options)
       : await ImagePicker.launchImageLibraryAsync(options);
   if (result.canceled || !result.assets[0]) return null;
-  const a = result.assets[0];
-  return { uri: a.uri, width: a.width };
-}
+  const { uri, width } = result.assets[0];
 
-/** Resizes to PHOTO_MAX_WIDTH and compresses to JPEG. Returns base64 data. */
-async function compress(photo: PickedPhoto): Promise<string> {
-  const ctx = ImageManipulator.manipulate(photo.uri);
-  if (photo.width > PHOTO_MAX_WIDTH) ctx.resize({ width: PHOTO_MAX_WIDTH });
+  const ctx = ImageManipulator.manipulate(uri);
+  if (width > PHOTO_MAX_WIDTH) ctx.resize({ width: PHOTO_MAX_WIDTH });
   const image = await ctx.renderAsync();
   const saved = await image.saveAsync({
     format: SaveFormat.JPEG,
@@ -39,16 +36,15 @@ async function compress(photo: PickedPhoto): Promise<string> {
     base64: true,
   });
   if (!saved.base64) throw new Error('Could not process photo');
-  return saved.base64;
+  return { uri: saved.uri, base64: saved.base64 };
 }
 
-/** Compresses and uploads a photo into the user's own folder. Returns the storage key. */
-export async function uploadPhoto(userId: string, photo: PickedPhoto): Promise<string> {
-  const base64 = await compress(photo);
+/** Uploads a prepared photo into the user's own folder. Returns the storage key. */
+export async function uploadPhoto(userId: string, photo: PreparedPhoto): Promise<string> {
   const key = `${userId}/${Crypto.randomUUID()}.jpg`;
   const { error } = await supabase.storage
     .from(STORAGE_BUCKET)
-    .upload(key, decode(base64), { contentType: 'image/jpeg' });
+    .upload(key, decode(photo.base64), { contentType: 'image/jpeg' });
   if (error) throw error;
   return key;
 }

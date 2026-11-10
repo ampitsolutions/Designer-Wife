@@ -23,3 +23,10 @@ export const CLOTHING_TYPES = [
   'Activewear',
   'Other',
 ] as const;
+
+export const FORMALITY_LEVELS = ['Casual', 'Smart casual', 'Formal', 'Festive'] as const;
+
+export const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'] as const;
+
+// Name of the Supabase Edge Function that suggests tags from a photo.
+export const TAG_FUNCTION = 'tag-item';

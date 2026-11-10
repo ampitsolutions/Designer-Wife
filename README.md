@@ -8,7 +8,7 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
 
 - [x] Step 1 — Expo app, sign-in, database schema with row level security
 - [x] Step 2 — Closet: photo, compress, upload, browse, edit/delete (background removal later)
-- [ ] Step 3 — AI tagging (Gemini)
+- [x] Step 3 — AI tagging (Gemini): name, type, colours, tags, occasions, formality, seasons
 - [ ] Step 4 — Closet browsing and filters
 - [ ] Step 5 — Outfits
 - [ ] Step 6 — Trips, weather, packing checklist
@@ -29,6 +29,16 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
    npx expo start
    ```
    Scan the QR code with **Expo Go** (iPhone camera or the Expo Go app on Android).
+
+## AI tagging setup (one time)
+
+1. Get a free Gemini API key at aistudio.google.com → **Get API key**.
+2. Supabase → **Edge Functions → Secrets** → add `GEMINI_API_KEY` with that key.
+3. Supabase → **Edge Functions → Deploy a new function → Via editor**. Name it `tag-item`,
+   paste the contents of `supabase/functions/tag-item/index.ts`, and deploy.
+   (Or with the Supabase CLI: `npx supabase functions deploy tag-item`.)
+
+Optional secret `GEMINI_MODEL` switches the model (default `gemini-2.5-flash`).
 
 ## Rules
 

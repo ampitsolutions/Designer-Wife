@@ -7,13 +7,21 @@ export type Item = {
   photo_key: string | null;
   type: string | null;
   colours: string[];
+  tags: string[];
+  occasions: string[];
+  seasons: string[];
+  formality: string | null;
   notes: string | null;
   created_at: string;
 };
 
-export type ItemFields = Pick<Item, 'name' | 'type' | 'colours' | 'notes'>;
+export type ItemFields = Pick<
+  Item,
+  'name' | 'type' | 'colours' | 'tags' | 'occasions' | 'seasons' | 'formality' | 'notes'
+>;
 
-const COLUMNS = 'id, owner_id, name, photo_key, type, colours, notes, created_at';
+const COLUMNS =
+  'id, owner_id, name, photo_key, type, colours, tags, occasions, seasons, formality, notes, created_at';
 
 export async function listMyItems(userId: string): Promise<Item[]> {
   const { data, error } = await supabase
@@ -45,10 +53,3 @@ export async function deleteItem(id: string) {
   const { error } = await supabase.from('items').delete().eq('id', id);
   if (error) throw error;
 }
-
-/** "navy, white" → ["navy", "white"] */
-export const parseColours = (text: string) =>
-  text
-    .split(',')
-    .map((c) => c.trim().toLowerCase())
-    .filter(Boolean);
