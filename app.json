@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Wardrobe",
-    "slug": "wardrobe",
+    "name": "Designer Wife",
+    "slug": "designer-wife",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,9 +21,16 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "wardrobe",
+    "scheme": "designerwife",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Designer Wife uses your photos to add clothes to your closet.",
+          "cameraPermission": "Designer Wife uses the camera to photograph clothes for your closet."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

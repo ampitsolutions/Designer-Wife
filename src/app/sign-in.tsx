@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { APP_NAME } from '@/config';
 import { isConfigured, supabase } from '@/lib/supabase';
 
 export default function SignIn() {
@@ -30,7 +31,7 @@ export default function SignIn() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Wardrobe</Text>
+      <Text style={styles.title}>{APP_NAME}</Text>
       {!isConfigured && (
         <Text style={styles.error}>Supabase is not configured. Add your keys to .env.</Text>
       )}

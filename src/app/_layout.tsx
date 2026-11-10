@@ -18,6 +18,11 @@ function RootStack() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="item/new"
+          options={{ headerShown: true, title: 'New item', presentation: 'modal' }}
+        />
+        <Stack.Screen name="item/[id]" options={{ headerShown: true, title: 'Item' }} />
       </Stack.Protected>
       <Stack.Protected guard={!session}>
         <Stack.Screen name="sign-in" />

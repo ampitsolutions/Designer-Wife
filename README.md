@@ -1,4 +1,4 @@
-# Wardrobe
+# Designer Wife
 
 Private iOS/Android app for two people to catalogue clothes, build outfits and plan trip packing.
 
@@ -7,7 +7,7 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
 ## Status
 
 - [x] Step 1 — Expo app, sign-in, database schema with row level security
-- [ ] Step 2 — Closet: photo, background removal, compress, upload to Supabase Storage
+- [x] Step 2 — Closet: photo, compress, upload, browse, edit/delete (background removal later)
 - [ ] Step 3 — AI tagging (Gemini)
 - [ ] Step 4 — Closet browsing and filters
 - [ ] Step 5 — Outfits
@@ -17,7 +17,7 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
 ## Setup (one time)
 
 1. **Supabase** — create a free project at supabase.com.
-   - SQL Editor → paste and run `supabase/migrations/0001_init.sql`.
+   - SQL Editor → paste and run each file in `supabase/migrations/` in order (`0001`, `0002`, …).
    - Authentication → Users → **Add user** for each of you (email + password, tick *Auto confirm*).
    - Authentication → Sign In / Providers → turn **off** "Allow new users to sign up" (keeps the app private).
    - Project Settings → API → copy the **Project URL** and **anon public** key.
