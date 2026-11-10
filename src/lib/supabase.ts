@@ -8,7 +8,7 @@ const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 export const isConfigured = Boolean(url && anonKey);
 
-export const supabase = createClient(url ?? 'http://localhost', anonKey ?? 'missing', {
+export const supabase = createClient(url || 'http://localhost', anonKey || 'missing', {
   auth: {
     storage: Platform.OS === 'web' ? undefined : AsyncStorage,
     autoRefreshToken: true,
