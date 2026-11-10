@@ -2,12 +2,12 @@
 
 Private iOS/Android app for two people to catalogue clothes, build outfits and plan trip packing.
 
-**Stack:** Expo (React Native, TypeScript) · Supabase (auth + Postgres) · Cloudflare R2 (photos) · Gemini API (free tier)
+**Stack:** Expo (React Native, TypeScript) · Supabase (auth, Postgres, photo storage) · Gemini API (free tier)
 
 ## Status
 
 - [x] Step 1 — Expo app, sign-in, database schema with row level security
-- [ ] Step 2 — Closet: photo, background removal, compress, upload to R2
+- [ ] Step 2 — Closet: photo, background removal, compress, upload to Supabase Storage
 - [ ] Step 3 — AI tagging (Gemini)
 - [ ] Step 4 — Closet browsing and filters
 - [ ] Step 5 — Outfits
@@ -22,7 +22,7 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
    - Authentication → Sign In / Providers → turn **off** "Allow new users to sign up" (keeps the app private).
    - Project Settings → API → copy the **Project URL** and **anon public** key.
 2. **Env file** — copy `.env.example` to `.env` and fill in the two `EXPO_PUBLIC_` values.
-   R2 and Gemini keys are set later as Edge Function secrets, never in the app.
+   The Gemini key is added later as an Edge Function secret, never in the app.
 3. **Run** — on your computer:
    ```bash
    npm install
@@ -34,4 +34,4 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
 
 - Free tiers only.
 - Never commit `.env` or keys.
-- R2 uploads go through a Supabase Edge Function, so R2 keys never ship in the app.
+- Photos go in Supabase Storage (1 GB free). Cloudflare R2 only if we outgrow it.
