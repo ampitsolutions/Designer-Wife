@@ -48,7 +48,7 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
    This one function does photo tagging, outfit ideas, trip plans and order import.
    Whenever this file changes, paste and deploy it again.
 
-Optional secret `GEMINI_MODEL` switches the model (default `gemini-2.5-flash`).
+Optional secret `GEMINI_MODEL` switches the model (default `gemini-3.8-flash`).
 
 Free Gemini tier limits: roughly 10 requests a minute and a few hundred a day. "Add many"
 spaces requests ~7 s apart and retries when the AI says it's busy.

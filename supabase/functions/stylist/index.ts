@@ -10,7 +10,7 @@
 //
 // Secrets (Supabase dashboard → Edge Functions → Secrets):
 //   GEMINI_API_KEY  required
-//   GEMINI_MODEL    optional, default "gemini-2.5-flash"
+//   GEMINI_MODEL    optional, default "gemini-3.8-flash"
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_CLOSET_ITEMS = 600;
@@ -81,7 +81,7 @@ function closetText(closet: ClosetItem[]) {
 async function gemini(parts: unknown[], schema: S, temperature = 0.4) {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) throw new HttpError(500, 'GEMINI_API_KEY is not set');
-  const model = Deno.env.get('GEMINI_MODEL') || 'gemini-2.5-flash';
+  const model = Deno.env.get('GEMINI_MODEL') || 'gemini-3.8-flash';
 
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
     method: 'POST',
