@@ -6,9 +6,11 @@ import { ItemThumb } from '@/components/ItemThumb';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useCloset } from '@/lib/closet';
+import { usePeople, type Person } from '@/lib/people';
+import { PersonSwitcher } from '@/components/PersonSwitcher';
 import { formatDate } from '@/lib/dates';
 import { supabase } from '@/lib/supabase';
-import { listDayItems, setMyDayItems, updateDay, type TripDay } from '@/lib/trips';
+import { listDayItems, listMembers, setMyDayItems, updateDay, type DayItem, type TripDay } from '@/lib/trips';
 import { weatherLine } from '@/lib/weather';
 import { page } from '@/lib/layout';
 
@@ -17,7 +19,12 @@ export default function TripDayScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuth();
   const me = session?.user.id;
-  const closet = useCloset(me);
+  const { people } = usePeople();
+  // Whose outfit I'm editing: me, or someone on the trip whose closet I manage.
+  const [who, setWho] = useState<string | null>(me ?? null);
+  const [onTrip, setOnTrip] = useState<Person[]>([]);
+  const [allItems, setAllItems] = useState<DayItem[]>([]);
+  const closet = useCloset(who);
 
   const [day, setDay] = useState<TripDay | null>(null);
   const [activities, setActivities] = useState('');
@@ -37,21 +44,41 @@ export default function TripDayScreen() {
         const d = data as TripDay;
         setDay(d);
         setActivities(d.activities ?? '');
-        const items = await listDayItems([d.id]);
+        const [items, members] = await Promise.all([listDayItems([d.id]), listMembers(d.trip_id)]);
+        setAllItems(items);
+        setOnTrip(people.filter((p) => members.includes(p.id)));
         setIds(items.filter((x) => x.user_id === me).map((x) => x.item_id));
       } catch (e) {
         Alert.alert('Could not load day', e instanceof Error ? e.message : String(e));
         router.back();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, me]);
 
+  function switchTo(person: string) {
+    if (!who || person === who) return;
+    // Keep unsaved picks for the person we're leaving.
+    setAllItems((all) => [
+      ...all.filter((x) => x.user_id !== who),
+      ...ids.map((item_id) => ({ trip_day_id: id, user_id: who, item_id })),
+    ]);
+    setIds(allItems.filter((x) => x.user_id === person).map((x) => x.item_id));
+    setWho(person);
+  }
+
   async function save() {
-    if (!day || !me) return;
+    if (!day || !who) return;
     setSaving(true);
     try {
       await updateDay(day.id, { activities: activities.trim() || null });
-      await setMyDayItems(day.id, me, ids);
+      const current = [
+        ...allItems.filter((x) => x.user_id !== who),
+        ...ids.map((item_id) => ({ trip_day_id: id, user_id: who, item_id })),
+      ];
+      for (const p of onTrip.length ? onTrip.map((x) => x.id) : [who]) {
+        await setMyDayItems(day.id, p, current.filter((x) => x.user_id === p).map((x) => x.item_id));
+      }
       router.back();
     } catch (e) {
       Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
@@ -86,7 +113,8 @@ export default function TripDayScreen() {
           onChangeText={setActivities}
         />
 
-        <Text style={styles.label}>What I'm wearing</Text>
+        <Text style={styles.label}>{onTrip.length > 1 ? 'Outfit for' : "What I'm wearing"}</Text>
+        {onTrip.length > 1 && <PersonSwitcher people={onTrip} activeId={who} onChange={switchTo} />}
         <View style={styles.grid}>
           {selected.map((it) => (
             <Pressable key={it!.id} onPress={() => toggle(it!.id)}>

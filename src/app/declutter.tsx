@@ -1,10 +1,10 @@
-import { router, useFocusEffect } from 'expo-router';
+import { router, Stack, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ItemThumb } from '@/components/ItemThumb';
 import { Empty } from '@/components/ui';
 import { KEEP_SNOOZE_MONTHS } from '@/config';
-import { useAuth } from '@/lib/auth';
+import { usePeople } from '@/lib/people';
 import { refreshCloset, useCloset } from '@/lib/closet';
 import { addDays, today } from '@/lib/dates';
 import { declutterSuggestions } from '@/lib/declutter';
@@ -24,9 +24,8 @@ function Action({ label, onPress, tone }: { label: string; onPress: () => void; 
 }
 
 export default function Declutter() {
-  const { session } = useAuth();
-  const me = session?.user.id;
-  const closet = useCloset(me);
+  const { activeId, active } = usePeople();
+  const closet = useCloset(activeId);
   const { wear, reload } = useWear();
   const [tab, setTab] = useState<Tab>('suggest');
 
@@ -44,7 +43,7 @@ export default function Declutter() {
   async function act(fn: () => Promise<unknown>) {
     try {
       await fn();
-      if (me) await refreshCloset(me);
+      if (activeId) await refreshCloset(activeId);
       await reload();
     } catch (e) {
       Alert.alert('Something went wrong', e instanceof Error ? e.message : String(e));
@@ -53,7 +52,7 @@ export default function Declutter() {
 
   const keep = (i: Item) => act(() => setItemStatus(i.id, 'active', addDays(now, KEEP_SNOOZE_MONTHS * 30)));
   const mark = (i: Item, s: ItemStatus) => act(() => setItemStatus(i.id, s));
-  const woreToday = (i: Item) => act(() => logWear([i.id]));
+  const woreToday = (i: Item) => act(() => logWear([i]));
   const gone = (i: Item) =>
     Alert.alert(`Remove "${i.name || 'this item'}" for good?`, 'It is deleted from your closet, outfits and plans.', [
       { text: 'Cancel', style: 'cancel' },
@@ -81,6 +80,7 @@ export default function Declutter() {
 
   return (
     <View style={styles.container}>
+      {active && !active.isMe && <Stack.Screen options={{ title: `Declutter ${active.name}'s closet` }} />}
       <View style={[page, { paddingHorizontal: 12 }]}>
       <View style={styles.tabs}>
         {tabs.map((t) => (

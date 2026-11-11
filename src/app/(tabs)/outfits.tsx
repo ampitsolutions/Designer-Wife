@@ -3,14 +3,13 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { OutfitCollage } from '@/components/ItemThumb';
 import { Empty, Fab } from '@/components/ui';
-import { useAuth } from '@/lib/auth';
+import { usePeople } from '@/lib/people';
 import { ensureUrls } from '@/lib/closet';
 import { listOutfits, setFavourite, type Outfit } from '@/lib/outfits';
 import { page } from '@/lib/layout';
 
 export default function OutfitsScreen() {
-  const { session } = useAuth();
-  const me = session?.user.id;
+  const { people, canManage, nameOf } = usePeople();
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,13 +43,17 @@ export default function OutfitsScreen() {
     }
   }
 
-  const mine = outfits.filter((o) => o.owner_id === me);
-  const shared = outfits.filter((o) => o.owner_id !== me);
-  const data = [
-    ...mine.map((o) => ({ key: o.id, outfit: o })),
-    ...(shared.length ? [{ key: 'shared-header', outfit: null as Outfit | null }] : []),
-    ...shared.map((o) => ({ key: o.id, outfit: o })),
-  ];
+  // Mine first, then each closet I manage, then outfits others shared with me.
+  type Row = { key: string; outfit: Outfit | null; title?: string };
+  const data: Row[] = [];
+  for (const p of people) {
+    const list = outfits.filter((o) => o.owner_id === p.id);
+    if (!p.isMe && list.length) data.push({ key: `h-${p.id}`, outfit: null, title: `${p.name}'s outfits` });
+    data.push(...list.map((o) => ({ key: o.id, outfit: o })));
+  }
+  const shared = outfits.filter((o) => !canManage(o.owner_id));
+  if (shared.length) data.push({ key: 'h-shared', outfit: null, title: 'Shared with you' });
+  data.push(...shared.map((o) => ({ key: o.id, outfit: o })));
 
   return (
     <View style={styles.container}>
@@ -66,9 +69,9 @@ export default function OutfitsScreen() {
           </Pressable>
         }
         renderItem={({ item: d }) => {
-          if (!d.outfit) return <Text style={styles.section}>Shared with you</Text>;
+          if (!d.outfit) return <Text style={styles.section}>{d.title}</Text>;
           const o = d.outfit;
-          const isMine = o.owner_id === me;
+          const isMine = canManage(o.owner_id);
           return (
             <Pressable style={styles.row} onPress={() => router.push(`/outfit/${o.id}`)}>
               <OutfitCollage items={o.items} size={84} />
@@ -77,7 +80,12 @@ export default function OutfitsScreen() {
                   {o.name || 'Untitled outfit'}
                 </Text>
                 <Text style={styles.meta} numberOfLines={1}>
-                  {[o.occasion, `${o.items.length} item${o.items.length === 1 ? '' : 's'}`, isMine && o.shared ? 'Shared' : null]
+                  {[
+                    o.occasion,
+                    `${o.items.length} item${o.items.length === 1 ? '' : 's'}`,
+                    isMine && o.shared ? 'Shared' : null,
+                    !isMine ? `by ${nameOf(o.owner_id)}` : null,
+                  ]
                     .filter(Boolean)
                     .join(' · ')}
                 </Text>

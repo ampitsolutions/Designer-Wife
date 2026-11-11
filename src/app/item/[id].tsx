@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { fieldsFromForm, formFromItem, ItemForm, type ItemFormValues } from '@/components/ItemForm';
 import { Banner, Button } from '@/components/ui';
-import { useAuth } from '@/lib/auth';
 import { refreshCloset } from '@/lib/closet';
 import { today } from '@/lib/dates';
 import { deleteItem, getItem, setItemPhoto, setItemStatus, updateItem, type Item } from '@/lib/items';
@@ -14,14 +13,13 @@ import { page } from '@/lib/layout';
 
 export default function EditItem() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { session } = useAuth();
   const [item, setItem] = useState<Item | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [values, setValues] = useState<ItemFormValues | null>(null);
   const [wear, setWear] = useState<Wear | undefined>();
   const [busy, setBusy] = useState<'save' | 'delete' | 'photo' | 'wear' | null>(null);
 
-  const refreshStore = () => session && refreshCloset(session.user.id);
+  const refreshStore = () => item && refreshCloset(item.owner_id);
   const done = () => {
     refreshStore();
     router.back();
@@ -55,13 +53,13 @@ export default function EditItem() {
   }
 
   async function changePhoto(source: 'camera' | 'library') {
-    if (!item || !session) return;
+    if (!item) return;
     let key: string | null = null;
     try {
       const photo = await pickPhoto(source);
       if (!photo) return;
       setBusy('photo');
-      key = await uploadPhoto(session.user.id, photo);
+      key = await uploadPhoto(item.owner_id, photo);
       await setItemPhoto(item.id, key);
       if (item.photo_key) await deletePhoto(item.photo_key);
       setItem({ ...item, photo_key: key });
@@ -79,7 +77,7 @@ export default function EditItem() {
     setBusy('wear');
     try {
       if (wear?.last_worn === today()) await unlogWear(id);
-      else await logWear([id]);
+      else if (item) await logWear([item]);
       setWear((await listWear())[id]);
     } catch (e) {
       Alert.alert('Could not update', e instanceof Error ? e.message : String(e));

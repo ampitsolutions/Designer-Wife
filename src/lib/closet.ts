@@ -4,80 +4,98 @@ import { listMyItems } from './items';
 import { photoUrls } from './photos';
 
 /**
- * One shared copy of the signed-in user's closet, used by every screen
- * (closet grid, outfit builder, trip planner). Call refreshCloset() after changes.
+ * Shared copies of closets (yours and any you manage), used by every screen.
+ * Call refreshCloset(personId) after changes. Photo links are shared across closets.
  */
-type State = {
-  userId: string | null;
-  items: Item[];
-  urls: Record<string, string>;
-  loading: boolean;
-  error: string | null;
-  loadedAt: number;
-};
+type Closet = { items: Item[]; loading: boolean; error: string | null; loadedAt: number };
+type State = { closets: Record<string, Closet>; urls: Record<string, string> };
 
-let state: State = { userId: null, items: [], urls: {}, loading: false, error: null, loadedAt: 0 };
+const emptyCloset: Closet = { items: [], loading: false, error: null, loadedAt: 0 };
+let state: State = { closets: {}, urls: {} };
 const listeners = new Set<() => void>();
-const set = (patch: Partial<State>) => {
-  state = { ...state, ...patch };
-  listeners.forEach((l) => l());
+const emit = () => listeners.forEach((l) => l());
+const setCloset = (id: string, patch: Partial<Closet>) => {
+  state = { ...state, closets: { ...state.closets, [id]: { ...(state.closets[id] ?? emptyCloset), ...patch } } };
+  emit();
+};
+const addUrls = (fresh: Record<string, string>) => {
+  if (!Object.keys(fresh).length) return;
+  state = { ...state, urls: { ...state.urls, ...fresh } };
+  emit();
 };
 
-let inflight: Promise<void> | null = null;
+const inflight = new Map<string, Promise<void>>();
 
-export function refreshCloset(userId: string): Promise<void> {
-  if (inflight && state.userId === userId) return inflight;
-  if (state.userId !== userId) set({ userId, items: [], urls: {}, loadedAt: 0 });
-  set({ loading: true });
-  inflight = (async () => {
+export function refreshCloset(personId: string): Promise<void> {
+  const running = inflight.get(personId);
+  if (running) return running;
+  setCloset(personId, { loading: true });
+  const p = (async () => {
     try {
-      const items = await listMyItems(userId);
-      const missing = items
-        .map((i) => i.photo_key)
-        .filter((k): k is string => !!k && !state.urls[k]);
-      const fresh = await photoUrls(missing);
-      set({ items, urls: { ...state.urls, ...fresh }, error: null, loadedAt: Date.now() });
+      const items = await listMyItems(personId);
+      const missing = items.map((i) => i.photo_key).filter((k): k is string => !!k && !state.urls[k]);
+      addUrls(await photoUrls(missing));
+      setCloset(personId, { items, error: null, loadedAt: Date.now() });
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : String(e) });
+      setCloset(personId, { error: e instanceof Error ? e.message : String(e) });
     } finally {
-      set({ loading: false });
-      inflight = null;
+      setCloset(personId, { loading: false });
+      inflight.delete(personId);
     }
   })();
-  return inflight;
+  inflight.set(personId, p);
+  return p;
 }
 
-/** Signed URLs for photos not in this user's closet (e.g. partner's items in a shared outfit). */
+/** Loads a closet if it isn't loaded yet; returns its active items. */
+export async function loadCloset(personId: string): Promise<Item[]> {
+  if (!state.closets[personId]?.loadedAt) await refreshCloset(personId);
+  return (state.closets[personId]?.items ?? []).filter((i) => i.status === 'active');
+}
+
+/** Signed URLs for photos not loaded yet (e.g. partner's items in a shared outfit). */
 export async function ensureUrls(keys: (string | null | undefined)[]) {
   const missing = [...new Set(keys.filter((k): k is string => !!k && !state.urls[k]))];
   if (!missing.length) return;
-  const fresh = await photoUrls(missing);
-  set({ urls: { ...state.urls, ...fresh } });
+  addUrls(await photoUrls(missing));
 }
 
 export function clearCloset() {
-  set({ userId: null, items: [], urls: {}, loading: false, error: null, loadedAt: 0 });
+  state = { closets: {}, urls: {} };
+  emit();
 }
+
+/** Finds an item in any loaded closet. */
+export const findItem = (id: string): Item | undefined => {
+  for (const c of Object.values(state.closets)) {
+    const hit = c.items.find((i) => i.id === id);
+    if (hit) return hit;
+  }
+  return undefined;
+};
 
 const subscribe = (l: () => void) => {
   listeners.add(l);
   return () => listeners.delete(l);
 };
 
-export function useCloset(userId: string | undefined) {
+/** One person's closet. `items` = in the closet now; `all` also includes things set aside to donate or sell. */
+export function useCloset(personId: string | null | undefined) {
   const snap = useSyncExternalStore(subscribe, () => state);
+  const closet = (personId && snap.closets[personId]) || emptyCloset;
 
   useEffect(() => {
-    if (userId && (snap.userId !== userId || !snap.loadedAt)) refreshCloset(userId);
-  }, [userId, snap.userId, snap.loadedAt]);
+    if (personId && !closet.loadedAt && !closet.loading && !closet.error) refreshCloset(personId);
+  }, [personId, closet.loadedAt, closet.loading, closet.error]);
 
-  const refresh = useCallback(() => (userId ? refreshCloset(userId) : Promise.resolve()), [userId]);
-  const byId = useCallback((id: string) => snap.items.find((i) => i.id === id), [snap.items]);
-  // `items` = what's in the closet now; `all` also includes things set aside to donate or sell.
-  const active = useMemo(() => snap.items.filter((i) => i.status === 'active'), [snap.items]);
+  const refresh = useCallback(() => (personId ? refreshCloset(personId) : Promise.resolve()), [personId]);
+  // Look up across all loaded closets so mixed outfits (e.g. a couple look) resolve.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const byId = useCallback((id: string) => findItem(id), [snap]);
+  const active = useMemo(() => closet.items.filter((i) => i.status === 'active'), [closet.items]);
 
-  return { ...snap, all: snap.items, items: active, refresh, byId };
+  return { ...closet, all: closet.items, items: active, refresh, byId };
 }
 
-/** Just the photo URL map, for screens that show items from elsewhere. */
+/** Just the photo URL map, for screens that show items from anywhere. */
 export const usePhotoUrls = () => useSyncExternalStore(subscribe, () => state.urls);

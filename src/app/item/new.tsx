@@ -11,16 +11,17 @@ import {
 } from '@/components/ItemForm';
 import { Button } from '@/components/ui';
 import { suggestTags } from '@/lib/ai';
-import { useAuth } from '@/lib/auth';
 import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
+import { usePeople } from '@/lib/people';
+import { Stack } from 'expo-router';
 import { deletePhoto, pickPhoto, uploadPhoto, type PreparedPhoto } from '@/lib/photos';
 import { page } from '@/lib/layout';
 
 type AiState = 'idle' | 'working' | 'done' | 'failed';
 
 export default function NewItem() {
-  const { session } = useAuth();
+  const { active } = usePeople();
   const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [values, setValues] = useState<ItemFormValues>(emptyItemForm);
   const [ai, setAi] = useState<AiState>('idle');
@@ -55,13 +56,13 @@ export default function NewItem() {
   }
 
   async function save() {
-    if (!photo || !session) return;
+    if (!photo || !active) return;
     setSaving(true);
     let key: string | null = null;
     try {
-      key = await uploadPhoto(session.user.id, photo);
-      await createItem({ ...fieldsFromForm(values), photo_key: key });
-      refreshCloset(session.user.id);
+      key = await uploadPhoto(active.id, photo);
+      await createItem({ ...fieldsFromForm(values), photo_key: key, owner_id: active.id });
+      refreshCloset(active.id);
       router.back();
     } catch (e) {
       if (key) await deletePhoto(key); // don't leave an orphaned photo
@@ -72,6 +73,7 @@ export default function NewItem() {
 
   return (
     <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
+      {active && !active.isMe && <Stack.Screen options={{ title: `New item for ${active.name}` }} />}
       {photo ? (
         <Image source={{ uri: photo.uri }} style={styles.photo} contentFit="contain" />
       ) : (

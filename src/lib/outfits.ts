@@ -57,7 +57,7 @@ async function setItems(outfitId: string, itemIds: string[]) {
   if (error) throw error;
 }
 
-export async function createOutfit(fields: OutfitFields, itemIds: string[]): Promise<string> {
+export async function createOutfit(fields: OutfitFields & { owner_id: string }, itemIds: string[]): Promise<string> {
   const { data, error } = await supabase.from('outfits').insert(fields).select('id').single();
   if (error) throw error;
   await setItems(data.id, itemIds);

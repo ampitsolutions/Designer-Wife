@@ -2,11 +2,12 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ClosetBrowser } from '@/components/ClosetBrowser';
+import { PersonSwitcher } from '@/components/PersonSwitcher';
 import { Empty, Fab } from '@/components/ui';
-import { useAuth } from '@/lib/auth';
 import { useCloset } from '@/lib/closet';
 import { today } from '@/lib/dates';
 import { declutterSuggestions } from '@/lib/declutter';
+import { usePeople } from '@/lib/people';
 import { useWear } from '@/lib/wear';
 
 function Tool({ label, onPress }: { label: string; onPress: () => void }) {
@@ -18,8 +19,8 @@ function Tool({ label, onPress }: { label: string; onPress: () => void }) {
 }
 
 export default function ClosetScreen() {
-  const { session } = useAuth();
-  const closet = useCloset(session?.user.id);
+  const { people, activeId, setActive } = usePeople();
+  const closet = useCloset(activeId);
   const { wear, reload } = useWear();
 
   useFocusEffect(
@@ -34,11 +35,14 @@ export default function ClosetScreen() {
   );
 
   const toolbar = (
+    <View>
+    <PersonSwitcher people={people} activeId={activeId} onChange={setActive} />
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tools}>
       <Tool label="📷  Add many" onPress={() => router.push('/item/bulk')} />
       <Tool label="🧾  Import order" onPress={() => router.push('/import')} />
       <Tool label={`🧺  Declutter${declutterCount ? ` (${declutterCount})` : ''}`} onPress={() => router.push('/declutter')} />
     </ScrollView>
+    </View>
   );
 
   return (

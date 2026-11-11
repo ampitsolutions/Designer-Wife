@@ -8,7 +8,8 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, Text
 import { applySuggestion, emptyItemForm, fieldsFromForm } from '@/components/ItemForm';
 import { Banner, Button } from '@/components/ui';
 import { readOrder, type OrderLine } from '@/lib/ai';
-import { useAuth } from '@/lib/auth';
+import { usePeople } from '@/lib/people';
+import { Stack } from 'expo-router';
 import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { boxToCrop, deletePhoto, pickMany, prepare, uploadPhoto, type PreparedPhoto, type RawPhoto } from '@/lib/photos';
@@ -24,7 +25,7 @@ type Line = OrderLine & { key: string; include: boolean; photo: PreparedPhoto | 
  * The AI lists the items (and finds product photos in screenshots); you review and add them.
  */
 export default function ImportOrder() {
-  const { session } = useAuth();
+  const { active } = usePeople();
   const [shots, setShots] = useState<RawPhoto[]>([]);
   const [pdf, setPdf] = useState<{ name: string; data: string } | null>(null);
   const [text, setText] = useState('');
@@ -81,14 +82,15 @@ export default function ImportOrder() {
   const patch = (key: string, p: Partial<Line>) => setLines((ls) => ls?.map((l) => (l.key === key ? { ...l, ...p } : l)) ?? ls);
 
   async function addAll() {
-    if (!session || !lines) return;
+    if (!active || !lines) return;
+    const owner = active.id;
     const chosen = lines.filter((l) => l.include && l.name.trim());
     setSaving({ done: 0, total: chosen.length });
     const failed: string[] = [];
     for (const [n, l] of chosen.entries()) {
       let key: string | null = null;
       try {
-        if (l.photo) key = await uploadPhoto(session.user.id, l.photo);
+        if (l.photo) key = await uploadPhoto(owner, l.photo);
         const values = applySuggestion(emptyItemForm, { ...l, name: l.name.trim() });
         const fields = fieldsFromForm(values);
         await createItem({
@@ -100,6 +102,7 @@ export default function ImportOrder() {
           retailer: l.retailer || null,
           purchased_on: l.order_date,
           source: 'order',
+          owner_id: owner,
         });
       } catch {
         if (key) await deletePhoto(key).catch(() => {});
@@ -107,7 +110,7 @@ export default function ImportOrder() {
       }
       setSaving({ done: n + 1, total: chosen.length });
     }
-    refreshCloset(session.user.id);
+    refreshCloset(owner);
     setSaving(null);
     if (failed.length) Alert.alert('Some items were not added', failed.join('\n'));
     else router.back();
@@ -164,6 +167,7 @@ export default function ImportOrder() {
   const hasInput = shots.length > 0 || !!pdf || text.trim().length > 0;
   return (
     <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
+      {active && !active.isMe && <Stack.Screen options={{ title: `Import for ${active.name}` }} />}
       <Text style={styles.hint}>
         Add screenshots of your order (best: product photos get cropped automatically), a PDF receipt, or paste the order email's
         text. Mix and match.

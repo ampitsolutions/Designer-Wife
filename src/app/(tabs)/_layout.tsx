@@ -1,7 +1,5 @@
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 import { Pressable, Text } from 'react-native';
-import { clearCloset } from '@/lib/closet';
-import { supabase } from '@/lib/supabase';
 
 export default function TabsLayout() {
   return (
@@ -9,11 +7,8 @@ export default function TabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: '#111',
         headerRight: () => (
-          <Pressable onPress={() => {
-            clearCloset();
-            supabase.auth.signOut();
-          }} style={{ marginRight: 16 }}>
-            <Text>Sign out</Text>
+          <Pressable onPress={() => router.push('/settings')} style={{ marginRight: 16 }} hitSlop={10} accessibilityLabel="Settings">
+            <Text style={{ fontSize: 15 }}>Settings</Text>
           </Pressable>
         ),
       }}

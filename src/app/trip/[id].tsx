@@ -1,11 +1,12 @@
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ItemThumb } from '@/components/ItemThumb';
 import { Banner, Button } from '@/components/ui';
 import { planTrip } from '@/lib/ai';
 import { useAuth } from '@/lib/auth';
-import { useCloset } from '@/lib/closet';
+import { loadCloset, useCloset } from '@/lib/closet';
+import { usePeople } from '@/lib/people';
 import { formatDate, formatRange } from '@/lib/dates';
 import { listProfiles, profileName, type Profile } from '@/lib/profiles';
 import {
@@ -31,6 +32,7 @@ export default function TripDetail() {
   const { session } = useAuth();
   const me = session?.user.id;
   const closet = useCloset(me);
+  const { canManage, nameOf } = usePeople();
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [days, setDays] = useState<TripDay[]>([]);
@@ -40,6 +42,7 @@ export default function TripDetail() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [weatherState, setWeatherState] = useState<'idle' | 'loading' | 'failed'>('idle');
   const [planning, setPlanning] = useState(false);
+  const [planningFor, setPlanningFor] = useState<string | null>(null);
   const [planError, setPlanError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -85,37 +88,57 @@ export default function TripDetail() {
     }, [load, refreshWeather]),
   );
 
+  // Everyone on the trip whose closet I can manage (me, plus e.g. my partner if they've given access).
+  const plannable = members.filter((m) => canManage(m));
+  // Load managed closets so their planned items show photos.
+  const plannableKey = plannable.join(',');
+  useEffect(() => {
+    plannable.forEach((p) => loadCloset(p).catch(() => {}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plannableKey]);
+
   async function runPlan() {
     if (!trip || !me) return;
-    if (!closet.items.length) return Alert.alert('Your closet is empty', 'Add some clothes first.');
     setPlanning(true);
     setPlanError(null);
+    const skipped: string[] = [];
     try {
-      const plan = await planTrip({
-        destination: trip.place_label ?? trip.destination ?? undefined,
-        itinerary: trip.itinerary ?? undefined,
-        days: days.map((d) => ({
-          date: d.day_date,
-          weather: d.weather ? weatherLine(d.weather) : undefined,
-          activities: d.activities ?? undefined,
-        })),
-        closet: closet.items,
-      });
-      await applyPlan(trip.id, me, days, plan);
+      for (const person of plannable) {
+        setPlanningFor(nameOf(person));
+        const items = await loadCloset(person);
+        if (!items.length) {
+          skipped.push(nameOf(person));
+          continue;
+        }
+        const plan = await planTrip({
+          destination: trip.place_label ?? trip.destination ?? undefined,
+          itinerary: trip.itinerary ?? undefined,
+          days: days.map((d) => ({
+            date: d.day_date,
+            weather: d.weather ? weatherLine(d.weather) : undefined,
+            activities: d.activities ?? undefined,
+          })),
+          closet: items,
+        });
+        await applyPlan(trip.id, person, days, plan);
+      }
       await load();
+      if (skipped.length) setPlanError(`Skipped ${skipped.join(', ')}: closet is empty.`);
     } catch (e) {
       setPlanError(e instanceof Error ? e.message : String(e));
     } finally {
       setPlanning(false);
+      setPlanningFor(null);
     }
   }
 
   function confirmPlan() {
-    const hasPlan = dayItems.some((d) => d.user_id === me);
+    const hasPlan = dayItems.some((d) => plannable.includes(d.user_id));
     if (!hasPlan) return runPlan();
+    const who = plannable.map((p) => (p === me ? 'your' : `${nameOf(p)}'s`)).join(' and ');
     Alert.alert(
-      'Replace your plan?',
-      'The AI will re-pick your outfits for every day. Packing lines you added yourself or already ticked are kept.',
+      'Replace the plan?',
+      `The AI will re-pick ${who} outfits for every day. Packing lines added by hand or already ticked are kept.`,
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Replace', onPress: runPlan },
@@ -146,7 +169,6 @@ export default function TripDetail() {
   const isOwner = trip.owner_id === me;
   const others = profiles.filter((p) => p.id !== me);
   const packed = packing.filter((p) => p.packed).length;
-  const myPlanned = new Set(dayItems.filter((d) => d.user_id === me).map((d) => d.trip_day_id));
 
   return (
     <>
@@ -198,7 +220,10 @@ export default function TripDetail() {
         {planning && (
           <Banner>
             <ActivityIndicator size="small" />
-            <Text style={{ flexShrink: 1 }}>Picking outfits for {days.length} days from {closet.items.length} items. This can take up to a minute.</Text>
+            <Text style={{ flexShrink: 1 }}>
+              Picking outfits for {days.length} days{planningFor ? ` for ${planningFor === 'You' ? 'you' : planningFor}` : ''}. This can take up to a
+              minute per person.
+            </Text>
           </Banner>
         )}
         {planError && (
@@ -232,11 +257,14 @@ export default function TripDetail() {
 
         {/* Days */}
         {days.map((d) => {
-          const mine = dayItems
-            .filter((x) => x.trip_day_id === d.id && x.user_id === me)
-            .map((x) => closet.byId(x.item_id))
-            .filter((i) => !!i);
-          const partnerCount = dayItems.filter((x) => x.trip_day_id === d.id && x.user_id !== me).length;
+          const todays = dayItems.filter((x) => x.trip_day_id === d.id);
+          const rows = plannable
+            .map((p) => ({
+              person: p,
+              items: todays.filter((x) => x.user_id === p).map((x) => closet.byId(x.item_id)).filter((i) => !!i),
+            }))
+            .filter((r) => r.items.length);
+          const otherCount = todays.filter((x) => !plannable.includes(x.user_id)).length;
           const w = d.weather;
           return (
             <Pressable key={d.id} style={styles.day} onPress={() => router.push(`/trip/day/${d.id}`)}>
@@ -250,16 +278,21 @@ export default function TripDetail() {
               </View>
               {d.activities ? <Text style={styles.activities}>{d.activities}</Text> : null}
               {d.plan ? <Text style={styles.note}>{d.plan}</Text> : null}
-              {mine.length ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
-                  {mine.map((it) => (
-                    <ItemThumb key={it!.id} item={it!} size={64} />
-                  ))}
-                </ScrollView>
+              {rows.length ? (
+                rows.map((r) => (
+                  <View key={r.person} style={{ gap: 4 }}>
+                    {plannable.length > 1 && <Text style={styles.who}>{nameOf(r.person)}</Text>}
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+                      {r.items.map((it) => (
+                        <ItemThumb key={it!.id} item={it!} size={64} />
+                      ))}
+                    </ScrollView>
+                  </View>
+                ))
               ) : (
-                <Text style={styles.hint}>{myPlanned.has(d.id) ? '' : 'Tap to choose what to wear'}</Text>
+                <Text style={styles.hint}>Tap to choose what to wear</Text>
               )}
-              {partnerCount > 0 && <Text style={styles.hint}>Partner has {partnerCount} item{partnerCount === 1 ? '' : 's'} planned</Text>}
+              {otherCount > 0 && <Text style={styles.hint}>Others have {otherCount} item{otherCount === 1 ? '' : 's'} planned</Text>}
             </Pressable>
           );
         })}
@@ -298,6 +331,7 @@ const styles = StyleSheet.create({
   activities: { color: '#333' },
   note: { color: '#6b5b2e', fontStyle: 'italic' },
   hint: { color: '#888' },
+  who: { fontSize: 12, fontWeight: '600', color: '#6b4f2a' },
   refresh: { alignSelf: 'center', padding: 8 },
   refreshText: { color: '#0a7aff' },
 });

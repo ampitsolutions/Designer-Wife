@@ -4,15 +4,21 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, 
 import { ItemThumb } from '@/components/ItemThumb';
 import { Banner, Button } from '@/components/ui';
 import { suggestOutfits, type OutfitIdea } from '@/lib/ai';
-import { useAuth } from '@/lib/auth';
-import { useCloset } from '@/lib/closet';
+import { loadCloset, useCloset } from '@/lib/closet';
+import type { Item } from '@/lib/items';
+import { usePeople } from '@/lib/people';
+import { PersonSwitcher } from '@/components/PersonSwitcher';
 import { page } from '@/lib/layout';
 
 const EXAMPLES = ['Office day', 'Friend’s wedding (evening)', 'Weekend brunch', 'Diwali party', 'Date night'];
 
 export default function OutfitIdeas() {
-  const { session } = useAuth();
-  const closet = useCloset(session?.user.id);
+  const { people, activeId, nameOf, me } = usePeople();
+  // Whose clothes to use: one person, or 'together' for coordinated looks from two closets.
+  const [forWho, setForWho] = useState<string | null>(activeId);
+  const together = forWho === 'together';
+  const closet = useCloset(together ? me : forWho);
+  const partner = people.find((p) => !p.isMe);
   const [occasion, setOccasion] = useState('');
   const [ideas, setIdeas] = useState<OutfitIdea[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -25,7 +31,17 @@ export default function OutfitIdeas() {
     setError(null);
     setIdeas(null);
     try {
-      setIdeas(await suggestOutfits(text.trim(), closet.items));
+      let items: Item[] = closet.items;
+      if (together && partner && me) {
+        const [mine, theirs] = await Promise.all([loadCloset(me), loadCloset(partner.id)]);
+        items = [...mine, ...theirs];
+      }
+      setIdeas(
+        await suggestOutfits(text.trim(), items, {
+          together,
+          whoOf: together ? (id) => (id === me ? 'You' : nameOf(id)) : undefined,
+        }),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -36,12 +52,23 @@ export default function OutfitIdeas() {
   function use(idea: OutfitIdea) {
     router.replace({
       pathname: '/outfit/new',
-      params: { items: idea.item_ids.join(','), name: idea.name, occasion: occasion.trim() },
+      params: { items: idea.item_ids.join(','), name: idea.name, occasion: occasion.trim(), ...(together ? { shared: '1' } : {}) },
     });
   }
 
   return (
     <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
+      {people.length > 1 && (
+        <>
+          <Text style={styles.label}>For</Text>
+          <PersonSwitcher
+            people={people}
+            activeId={forWho}
+            onChange={setForWho}
+            extra={partner ? { id: 'together', label: `Together (matching looks)` } : undefined}
+          />
+        </>
+      )}
       <Text style={styles.label}>What's the occasion?</Text>
       <TextInput
         style={styles.input}

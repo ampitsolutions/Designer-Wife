@@ -46,6 +46,7 @@ const oneOf = (values: string[]): S => (values.length ? { enum: values, format: 
 
 type ClosetItem = {
   id: string;
+  who?: string; // whose closet, when planning for more than one person
   name?: string | null;
   type?: string | null;
   colours?: string[];
@@ -62,6 +63,7 @@ function closetText(closet: ClosetItem[]) {
     .map((i) =>
       [
         `id=${i.id}`,
+        i.who && `who=${i.who}`,
         i.name && `name=${i.name}`,
         i.type && `type=${i.type}`,
         i.colours?.length && `colours=${i.colours.join('/')}`,
@@ -129,11 +131,12 @@ async function tag(body: any) {
 }
 
 async function outfits(body: any) {
-  const { occasion, date, weather, closet = [] } = body as {
+  const { occasion, date, weather, closet = [], together = false } = body as {
     occasion?: string;
     date?: string;
     weather?: string;
     closet: ClosetItem[];
+    together?: boolean;
   };
   if (!occasion) throw new HttpError(400, 'occasion is required');
   if (!closet.length) throw new HttpError(400, 'Your closet is empty');
@@ -147,8 +150,14 @@ async function outfits(body: any) {
       }),
     ),
   });
+  const people = [...new Set(closet.map((i) => i.who).filter(Boolean))] as string[];
+  const coordinated = together && people.length > 1;
   const prompt =
-    `Suggest up to 3 different outfits for this occasion: "${occasion}".` +
+    (coordinated
+      ? `Suggest up to 3 coordinated looks for ${people.join(' and ')} to wear together to: "${occasion}". ` +
+        'Each look must include a complete outfit for EACH person, using only that person\'s items (see who=). ' +
+        'Make the two outfits complement each other (matching or harmonising colours, same formality). '
+      : `Suggest up to 3 different outfits for this occasion: "${occasion}".`) +
     (date ? ` Date: ${date}.` : '') +
     (weather ? ` Expected weather: ${weather}.` : '') +
     ' Use ONLY items from the closet below, referenced by their exact id. Each outfit should be complete ' +

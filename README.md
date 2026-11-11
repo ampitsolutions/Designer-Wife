@@ -16,13 +16,14 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
 - [x] Add many photos at once (auto-tagged and saved)
 - [x] Wear tracking ("Wore it today") and declutter list (donate / sell)
 - [x] Import from an online order: screenshots, PDF receipt or pasted email text
+- [x] Manage someone else's closet (Settings → give access); matching couple looks; trip plans for both
 - [x] App icon and splash
 - [ ] Background removal (needs an installed build, see docs/PHONE_TESTING.md)
 
 ## Setup (one time)
 
 1. **Supabase** — create a free project at supabase.com.
-   - SQL Editor → paste and run each file in `supabase/migrations/` in order (`0001` … `0006`).
+   - SQL Editor → paste and run each file in `supabase/migrations/` in order (`0001` … `0007`).
      Already ran some? Just run the ones you haven't; each is safe to run once.
    - Authentication → Users → **Add user** for each of you (email + password, tick *Auto confirm*).
    - Authentication → Sign In / Providers → turn **off** "Allow new users to sign up" (keeps the app private).

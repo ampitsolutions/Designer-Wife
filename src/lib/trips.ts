@@ -198,7 +198,7 @@ export async function applyPlan(tripId: string, userId: string, days: TripDay[],
   const keptKeys = new Set(kept.map((p) => p.item_id ?? `label:${p.label.toLowerCase()}`));
   const rows = plan.packing
     .filter((p) => !keptKeys.has(p.item_id ?? `label:${p.label.toLowerCase()}`))
-    .map((p) => ({ trip_id: tripId, item_id: p.item_id, label: p.label, quantity: p.quantity, from_ai: true }));
+    .map((p) => ({ trip_id: tripId, owner_id: userId, item_id: p.item_id, label: p.label, quantity: p.quantity, from_ai: true }));
   if (rows.length) {
     const { error: e } = await supabase.from('packing_items').insert(rows);
     if (e) throw e;

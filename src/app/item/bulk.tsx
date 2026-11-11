@@ -6,7 +6,7 @@ import { applySuggestion, emptyItemForm, fieldsFromForm } from '@/components/Ite
 import { Banner, Button } from '@/components/ui';
 import { AI_CALL_SPACING_MS, BULK_MAX_PHOTOS } from '@/config';
 import { suggestTags, withRetry } from '@/lib/ai';
-import { useAuth } from '@/lib/auth';
+import { usePeople } from '@/lib/people';
 import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { deletePhoto, pickMany, prepare, uploadPhoto, type RawPhoto } from '@/lib/photos';
@@ -22,7 +22,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * Items whose AI tagging failed are still saved and can be filled in later.
  */
 export default function BulkAdd() {
-  const { session } = useAuth();
+  const { active } = usePeople();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [running, setRunning] = useState(false);
   const stop = useRef(false);
@@ -42,7 +42,8 @@ export default function BulkAdd() {
   }
 
   async function run(list: Row[]) {
-    if (!session) return;
+    if (!active) return;
+    const owner = active.id;
     stop.current = false;
     setRunning(true);
     let lastAi = 0;
@@ -63,8 +64,8 @@ export default function BulkAdd() {
         } catch {
           tagged = false;
         }
-        key = await uploadPhoto(session.user.id, photo);
-        const itemId = await createItem({ ...fieldsFromForm(values), photo_key: key, source: 'bulk' });
+        key = await uploadPhoto(owner, photo);
+        const itemId = await createItem({ ...fieldsFromForm(values), photo_key: key, source: 'bulk', owner_id: owner });
         patch(row.key, { status: tagged ? 'done' : 'no-tags', itemId, name: values.name || undefined });
       } catch (e) {
         if (key) await deletePhoto(key).catch(() => {});
@@ -72,7 +73,7 @@ export default function BulkAdd() {
       }
     }
     setRunning(false);
-    refreshCloset(session.user.id);
+    refreshCloset(owner);
   }
 
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function BulkAdd() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Add many', gestureEnabled: !running }} />
+      <Stack.Screen options={{ title: active && !active.isMe ? `Add many for ${active.name}` : 'Add many', gestureEnabled: !running }} />
       {!rows ? (
         <View style={styles.center}>
           <ActivityIndicator />

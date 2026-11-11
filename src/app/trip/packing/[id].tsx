@@ -4,7 +4,8 @@ import { Alert, Pressable, RefreshControl, SectionList, StyleSheet, Text, TextIn
 import { ItemThumb } from '@/components/ItemThumb';
 import { Empty } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { useCloset } from '@/lib/closet';
+import { findItem, useCloset } from '@/lib/closet';
+import { usePeople } from '@/lib/people';
 import { listProfiles, profileName, type Profile } from '@/lib/profiles';
 import { addPacking, deletePacking, listPacking, setPacked, type PackingItem } from '@/lib/trips';
 import { page } from '@/lib/layout';
@@ -13,7 +14,8 @@ export default function PackingList() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuth();
   const me = session?.user.id;
-  const closet = useCloset(me);
+  useCloset(me); // keeps my closet loaded for photos
+  const { canManage } = usePeople();
 
   const [lines, setLines] = useState<PackingItem[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -114,12 +116,12 @@ export default function PackingList() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         renderSectionHeader={({ section }) => <Text style={styles.section}>{section.title}</Text>}
         renderItem={({ item: line }) => {
-          const it = line.item_id && line.owner_id === me ? closet.byId(line.item_id) : undefined;
+          const it = line.item_id && canManage(line.owner_id) ? findItem(line.item_id) : undefined;
           return (
             <Pressable
               style={styles.line}
               onPress={() => toggle(line)}
-              onLongPress={line.owner_id === me ? () => remove(line) : undefined}
+              onLongPress={canManage(line.owner_id) ? () => remove(line) : undefined}
             >
               <View style={[styles.box, line.packed && styles.boxOn]}>
                 {line.packed && <Text style={styles.check}>✓</Text>}

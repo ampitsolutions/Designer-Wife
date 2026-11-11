@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
-import { useAuth } from '@/lib/auth';
 import { useCloset } from '@/lib/closet';
+import { usePeople } from '@/lib/people';
+import { PersonSwitcher } from './PersonSwitcher';
 import type { Item } from '@/lib/items';
 import { createOutfit, deleteOutfit, updateOutfit, type Outfit } from '@/lib/outfits';
 import { logWear } from '@/lib/wear';
@@ -20,24 +21,28 @@ export function OutfitEditor({
   initial,
 }: {
   outfit?: Outfit;
-  initial?: { name?: string; occasion?: string; itemIds?: string[] };
+  initial?: { name?: string; occasion?: string; itemIds?: string[]; shared?: boolean };
 }) {
-  const { session } = useAuth();
-  const closet = useCloset(session?.user.id);
-  const readOnly = !!outfit && outfit.owner_id !== session?.user.id;
+  const { people, activeId, canManage, nameOf } = usePeople();
+  // New outfits belong to whoever's closet is selected; existing ones keep their owner.
+  const ownerId = outfit?.owner_id ?? activeId;
+  const readOnly = !!outfit && !canManage(outfit.owner_id);
+  // Which closet the item picker shows (you can mix closets you manage, e.g. a matching couple look).
+  const [pickFrom, setPickFrom] = useState<string | null>(ownerId);
+  const closet = useCloset(pickFrom);
 
   const [name, setName] = useState(outfit?.name ?? initial?.name ?? '');
   const [occasion, setOccasion] = useState(outfit?.occasion ?? initial?.occasion ?? '');
   const [favourite, setFav] = useState(outfit?.is_favourite ?? false);
-  const [shared, setShared] = useState(outfit?.shared ?? false);
+  const [shared, setShared] = useState(outfit?.shared ?? initial?.shared ?? false);
   const [ids, setIds] = useState<string[]>(outfit?.items.map((i) => i.id) ?? initial?.itemIds ?? []);
   const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState<'save' | 'delete' | null>(null);
   const [wornToday, setWornToday] = useState(false);
 
   async function woreIt() {
-    // Only my own items can be logged (a shared outfit may contain my partner's things).
-    const mine = selected.filter((i) => i.owner_id === session?.user.id).map((i) => i.id);
+    // Only items in closets I manage can be logged.
+    const mine = selected.filter((i) => canManage(i.owner_id));
     try {
       await logWear(mine);
       setWornToday(true);
@@ -58,7 +63,7 @@ export function OutfitEditor({
     const fields = { name: name.trim() || null, occasion: occasion.trim() || null, is_favourite: favourite, shared };
     try {
       if (outfit) await updateOutfit(outfit.id, fields, ids);
-      else await createOutfit(fields, ids);
+      else await createOutfit({ ...fields, owner_id: ownerId! }, ids);
       router.back();
     } catch (e) {
       Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
@@ -109,7 +114,7 @@ export function OutfitEditor({
           <View style={styles.readOnly}>
             <Text style={styles.title}>{outfit?.name || 'Untitled outfit'}</Text>
             {outfit?.occasion ? <Text style={styles.meta}>{outfit.occasion}</Text> : null}
-            <Text style={styles.meta}>Shared with you by your partner.</Text>
+            <Text style={styles.meta}>Shared with you by {nameOf(outfit?.owner_id)}.</Text>
           </View>
         ) : (
           <>
@@ -152,6 +157,9 @@ export function OutfitEditor({
           <Pressable onPress={() => setPicking(false)} hitSlop={12}>
             <Text style={styles.done}>Done</Text>
           </Pressable>
+        </View>
+        <View style={{ paddingHorizontal: 12 }}>
+          <PersonSwitcher people={people} activeId={pickFrom} onChange={setPickFrom} />
         </View>
         <ClosetBrowser
           items={closet.items}

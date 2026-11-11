@@ -52,10 +52,11 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-/** Only the fields the AI needs, to keep requests small. */
-const compact = (items: Item[]) =>
-  items.map(({ id, name, type, colours, tags, occasions, seasons, formality }) => ({
+/** Only the fields the AI needs, to keep requests small. `who` labels whose closet it is. */
+const compact = (items: Item[], whoOf?: (ownerId: string) => string) =>
+  items.map(({ id, owner_id, name, type, colours, tags, occasions, seasons, formality }) => ({
     id,
+    who: whoOf ? whoOf(owner_id) : undefined,
     name,
     type,
     colours,
@@ -78,18 +79,24 @@ export async function suggestTags(photo: PreparedPhoto): Promise<TagSuggestion> 
   return data.suggestion ?? {};
 }
 
-/** Up to 3 outfit ideas for an occasion, using only the given closet items. */
+/**
+ * Up to 3 outfit ideas for an occasion, using only the given closet items.
+ * With `together`, the closet holds two people's items (labelled by whoOf) and each idea is a coordinated pair.
+ */
 export async function suggestOutfits(
   occasion: string,
   closet: Item[],
-  opts: { date?: string; weather?: string } = {},
+  opts: { date?: string; weather?: string; together?: boolean; whoOf?: (ownerId: string) => string } = {},
 ): Promise<OutfitIdea[]> {
-  const data = await call<{ outfits?: OutfitIdea[] }>({
-    action: 'outfits',
-    occasion,
-    ...opts,
-    closet: compact(closet),
-  });
+  const { whoOf, ...rest } = opts;
+  const data = await withRetry(() =>
+    call<{ outfits?: OutfitIdea[] }>({
+      action: 'outfits',
+      occasion,
+      ...rest,
+      closet: compact(closet, whoOf),
+    }),
+  );
   return data.outfits ?? [];
 }
 

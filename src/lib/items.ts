@@ -36,6 +36,9 @@ const COLUMNS =
 /** Extra fields that can be set when creating an item (e.g. from an order). */
 export type ItemExtras = Partial<Pick<Item, 'brand' | 'size' | 'retailer' | 'purchased_on' | 'source'>>;
 
+/** Whose closet a new item goes into (yours, or one you manage). */
+export type ItemOwner = { owner_id: string };
+
 export async function listMyItems(userId: string): Promise<Item[]> {
   const { data, error } = await supabase
     .from('items')
@@ -52,7 +55,9 @@ export async function getItem(id: string): Promise<Item> {
   return data as unknown as Item;
 }
 
-export async function createItem(fields: ItemFields & ItemExtras & { photo_key: string | null }): Promise<string> {
+export async function createItem(
+  fields: ItemFields & ItemExtras & ItemOwner & { photo_key: string | null },
+): Promise<string> {
   const { data, error } = await supabase.from('items').insert(fields).select('id').single();
   if (error) throw error;
   return data.id as string;

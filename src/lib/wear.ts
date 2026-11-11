@@ -5,12 +5,12 @@ import { supabase } from './supabase';
 export type Wear = { last_worn: string; times_worn: number };
 
 /** Records that these items were worn on a date (default today). Re-logging the same day is ignored. */
-export async function logWear(itemIds: string[], date = today()) {
-  if (!itemIds.length) return;
+export async function logWear(items: { id: string; owner_id: string }[], date = today()) {
+  if (!items.length) return;
   const { error } = await supabase
     .from('wear_logs')
     .upsert(
-      itemIds.map((item_id) => ({ item_id, worn_on: date })),
+      items.map((i) => ({ item_id: i.id, owner_id: i.owner_id, worn_on: date })),
       { onConflict: 'item_id,worn_on', ignoreDuplicates: true },
     );
   if (error) throw error;

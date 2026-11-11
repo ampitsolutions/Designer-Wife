@@ -29,6 +29,7 @@ function RootStack() {
         <Stack.Screen name="item/bulk" options={{ headerShown: true, title: 'Add many' }} />
         <Stack.Screen name="import" options={{ headerShown: true, title: 'Import order' }} />
         <Stack.Screen name="declutter" options={{ headerShown: true, title: 'Declutter' }} />
+        <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings', presentation: 'modal' }} />
         <Stack.Screen name="outfit/new" options={{ headerShown: true, title: 'New outfit' }} />
         <Stack.Screen name="outfit/[id]" options={{ headerShown: true, title: 'Outfit' }} />
         <Stack.Screen name="outfit/ideas" options={{ headerShown: true, title: 'Outfit ideas' }} />
