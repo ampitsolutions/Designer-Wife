@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { Item } from './items';
 import { listMyItems } from './items';
 import { photoUrls } from './photos';
@@ -73,8 +73,10 @@ export function useCloset(userId: string | undefined) {
 
   const refresh = useCallback(() => (userId ? refreshCloset(userId) : Promise.resolve()), [userId]);
   const byId = useCallback((id: string) => snap.items.find((i) => i.id === id), [snap.items]);
+  // `items` = what's in the closet now; `all` also includes things set aside to donate or sell.
+  const active = useMemo(() => snap.items.filter((i) => i.status === 'active'), [snap.items]);
 
-  return { ...snap, refresh, byId };
+  return { ...snap, all: snap.items, items: active, refresh, byId };
 }
 
 /** Just the photo URL map, for screens that show items from elsewhere. */

@@ -5,6 +5,8 @@
 //   { action: "outfits", occasion, date?, weather?, closet }               → { outfits: [...] }
 //   { action: "trip",    destination, days: [{date, weather, activities}], itinerary?, closet }
 //                                                                          → { days: [...], packing: [...] }
+//   { action: "order",   text?, images?: [{data, mimeType}], pdf?: {data}, types, formalities, seasons }
+//                                                                          → { items: [...] }
 //
 // Secrets (Supabase dashboard → Edge Functions → Secrets):
 //   GEMINI_API_KEY  required
@@ -12,6 +14,9 @@
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_CLOSET_ITEMS = 600;
+const MAX_ORDER_IMAGES = 6;
+const MAX_ORDER_BYTES = 12 * 1024 * 1024;
+const MAX_ORDER_TEXT = 60_000;
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -86,7 +91,8 @@ async function gemini(parts: unknown[], schema: S, temperature = 0.4) {
   });
   if (!res.ok) {
     console.error('Gemini error', res.status, await res.text());
-    throw new HttpError(502, res.status === 429 ? 'AI is busy, try again in a minute' : `AI request failed (${res.status})`);
+    if (res.status === 429) throw new HttpError(429, 'AI is busy, try again in a minute');
+    throw new HttpError(502, `AI request failed (${res.status})`);
   }
   const data = await res.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -239,7 +245,84 @@ async function trip(body: any) {
   return { days: planned, packing };
 }
 
-const actions: Record<string, (body: any) => Promise<unknown>> = { tag, outfits, trip };
+async function order(body: any) {
+  const { text = '', images = [], pdf, types = [], formalities = [], seasons = [] } = body as {
+    text?: string;
+    images?: { data: string; mimeType?: string }[];
+    pdf?: { data: string };
+    types: string[];
+    formalities: string[];
+    seasons: string[];
+  };
+  if (!text.trim() && !images.length && !pdf) throw new HttpError(400, 'Add a screenshot, PDF or the order text');
+  if (images.length > MAX_ORDER_IMAGES) throw new HttpError(400, `Up to ${MAX_ORDER_IMAGES} screenshots at a time`);
+  const bytes = images.reduce((n, i) => n + i.data.length * 0.75, 0) + (pdf ? pdf.data.length * 0.75 : 0);
+  if (bytes > MAX_ORDER_BYTES) throw new HttpError(413, 'Files too large; try fewer screenshots');
+
+  const schema = obj({
+    items: list(
+      obj(
+        {
+          name: str({ description: 'Short everyday item name, e.g. "Navy linen shirt"' }),
+          brand: str({ description: 'Brand, or empty string' }),
+          retailer: str({ description: 'Store the order is from, or empty string' }),
+          type: str(oneOf(types)),
+          colours: list(str({ description: 'Simple lowercase colour names' })),
+          size: str({ description: 'Size as written, or empty string' }),
+          quantity: int(),
+          order_date: str({ description: 'YYYY-MM-DD if shown, else empty string' }),
+          formality: str(oneOf(formalities)),
+          seasons: list(str(oneOf(seasons))),
+          occasions: list(str({ description: 'lowercase, e.g. work, wedding, gym' })),
+          tags: list(str({ description: 'lowercase: fabric, pattern, fit, style' })),
+          photo_image: int({ description: 'Index of the screenshot showing this product photo, or -1 if none' }),
+          photo_box: list(int(), {
+            description: 'Product photo bounding box [ymin, xmin, ymax, xmax] scaled 0-1000, or empty',
+          }),
+        },
+        ['name', 'brand', 'retailer', 'type', 'colours', 'size', 'quantity', 'order_date', 'formality', 'seasons', 'occasions', 'tags', 'photo_image', 'photo_box'],
+      ),
+    ),
+  });
+
+  const prompt =
+    'This is an online clothing order (confirmation email, receipt or screenshot). List every clothing, ' +
+    'shoe, bag or accessory item that was bought. Skip gift cards, shipping, taxes, returns and anything ' +
+    'that is not something to wear. Infer colour, type and season from the product name and photo. ' +
+    (images.length
+      ? `There are ${images.length} screenshot(s), numbered from 0. For each item, if its product photo is visible, ` +
+        'give photo_image (the screenshot number) and photo_box around just that product photo. '
+      : 'There are no screenshots, so set photo_image to -1 and photo_box to []. ') +
+    (text.trim() ? `\n\nORDER TEXT:\n${text.slice(0, MAX_ORDER_TEXT)}` : '');
+
+  const parts: unknown[] = [
+    ...images.map((i) => ({ inline_data: { mime_type: i.mimeType || 'image/jpeg', data: i.data } })),
+    ...(pdf ? [{ inline_data: { mime_type: 'application/pdf', data: pdf.data } }] : []),
+    { text: prompt },
+  ];
+  const result = await gemini(parts, schema, 0.1);
+
+  const items = (result.items ?? [])
+    .filter((i: any) => String(i.name ?? '').trim())
+    .map((i: any) => {
+      const box = Array.isArray(i.photo_box) ? i.photo_box.map(Number) : [];
+      const validBox =
+        box.length === 4 && box.every((n: number) => n >= 0 && n <= 1000) && box[2] > box[0] && box[3] > box[1];
+      const idx = Number(i.photo_image);
+      const hasPhoto = validBox && Number.isInteger(idx) && idx >= 0 && idx < images.length;
+      return {
+        ...i,
+        name: String(i.name).trim(),
+        quantity: Math.max(1, Math.min(20, Number(i.quantity) || 1)),
+        order_date: /^\d{4}-\d{2}-\d{2}$/.test(i.order_date ?? '') ? i.order_date : null,
+        photo_image: hasPhoto ? idx : -1,
+        photo_box: hasPhoto ? box : null,
+      };
+    });
+  return { items };
+}
+
+const actions: Record<string, (body: any) => Promise<unknown>> = { tag, outfits, trip, order };
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });

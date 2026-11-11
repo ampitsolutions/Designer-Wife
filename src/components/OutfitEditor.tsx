@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { useCloset } from '@/lib/closet';
 import type { Item } from '@/lib/items';
 import { createOutfit, deleteOutfit, updateOutfit, type Outfit } from '@/lib/outfits';
+import { logWear } from '@/lib/wear';
 import { ClosetBrowser } from './ClosetBrowser';
 import { ItemThumb } from './ItemThumb';
 import { Button } from './ui';
@@ -31,6 +32,18 @@ export function OutfitEditor({
   const [ids, setIds] = useState<string[]>(outfit?.items.map((i) => i.id) ?? initial?.itemIds ?? []);
   const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState<'save' | 'delete' | null>(null);
+  const [wornToday, setWornToday] = useState(false);
+
+  async function woreIt() {
+    // Only my own items can be logged (a shared outfit may contain my partner's things).
+    const mine = selected.filter((i) => i.owner_id === session?.user.id).map((i) => i.id);
+    try {
+      await logWear(mine);
+      setWornToday(true);
+    } catch (e) {
+      Alert.alert('Could not log', e instanceof Error ? e.message : String(e));
+    }
+  }
 
   // Items come from my closet; for someone else's shared outfit, from the outfit itself.
   const lookup = (id: string): Item | undefined => closet.byId(id) ?? outfit?.items.find((i) => i.id === id);
@@ -114,6 +127,16 @@ export function OutfitEditor({
               </View>
               <Switch value={shared} onValueChange={setShared} />
             </View>
+            {outfit && (
+              <View style={styles.buttons}>
+                <Button
+                  title={wornToday ? '✓ Logged as worn today' : 'Wore this today'}
+                  variant="secondary"
+                  onPress={woreIt}
+                  disabled={wornToday || !ids.length}
+                />
+              </View>
+            )}
             <View style={styles.buttons}>
               {outfit && <Button title="Delete" variant="danger" onPress={remove} busy={busy === 'delete'} disabled={!!busy} />}
               <Button title="Save outfit" onPress={save} busy={busy === 'save'} disabled={!!busy || !ids.length} />

@@ -36,3 +36,14 @@ export const REPEAT_WINDOW_DAYS = 60;
 
 // Trips longer than this are refused (keeps AI requests and weather lookups small).
 export const MAX_TRIP_DAYS = 30;
+
+// Declutter: suggest items not worn for this many months...
+export const DECLUTTER_UNWORN_MONTHS = 12;
+// ...or never worn and added at least this many months ago.
+export const DECLUTTER_NEVER_WORN_MONTHS = 3;
+// "Keep" hides an item from declutter suggestions for this many months.
+export const KEEP_SNOOZE_MONTHS = 6;
+
+// Bulk add: max photos per batch, and pause between AI calls (free Gemini tier allows ~10 per minute).
+export const BULK_MAX_PHOTOS = 30;
+export const AI_CALL_SPACING_MS = 6500;

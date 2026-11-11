@@ -13,13 +13,16 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
 - [x] Outfits: build, favourite, share with partner, AI outfit ideas
 - [x] Trips: dates, itinerary, share, weather, AI day-by-day outfits, packing checklist
 - [x] Calendar: plan outfits for events, repeat warnings
+- [x] Add many photos at once (auto-tagged and saved)
+- [x] Wear tracking ("Wore it today") and declutter list (donate / sell)
+- [x] Import from an online order: screenshots, PDF receipt or pasted email text
 - [x] App icon and splash
 - [ ] Background removal (needs an installed build, see docs/PHONE_TESTING.md)
 
 ## Setup (one time)
 
 1. **Supabase** — create a free project at supabase.com.
-   - SQL Editor → paste and run each file in `supabase/migrations/` in order (`0001` … `0005`).
+   - SQL Editor → paste and run each file in `supabase/migrations/` in order (`0001` … `0006`).
      Already ran some? Just run the ones you haven't; each is safe to run once.
    - Authentication → Users → **Add user** for each of you (email + password, tick *Auto confirm*).
    - Authentication → Sign In / Providers → turn **off** "Allow new users to sign up" (keeps the app private).
@@ -41,9 +44,13 @@ Private iOS/Android app for two people to catalogue clothes, build outfits and p
 3. Supabase → **Edge Functions → Deploy a new function → Via editor**. Name it `stylist`,
    paste the contents of `supabase/functions/stylist/index.ts`, and deploy.
    (Or with the Supabase CLI: `npx supabase functions deploy stylist`.)
-   This one function does photo tagging, outfit ideas and trip plans.
+   This one function does photo tagging, outfit ideas, trip plans and order import.
+   Whenever this file changes, paste and deploy it again.
 
 Optional secret `GEMINI_MODEL` switches the model (default `gemini-2.5-flash`).
+
+Free Gemini tier limits: roughly 10 requests a minute and a few hundred a day. "Add many"
+spaces requests ~7 s apart and retries when the AI says it's busy.
 
 ## Rules
 

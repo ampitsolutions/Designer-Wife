@@ -21,7 +21,7 @@ export type OutfitFields = {
 
 const SELECT =
   'id, owner_id, name, occasion, is_favourite, shared, created_at, ' +
-  'outfit_items ( items ( id, owner_id, name, photo_key, type, colours, tags, occasions, seasons, formality, notes, created_at ) )';
+  'outfit_items ( items ( id, owner_id, name, photo_key, type, colours, tags, occasions, seasons, formality, notes, status, keep_until, brand, size, retailer, purchased_on, source, created_at ) )';
 
 type Row = Omit<Outfit, 'items'> & { outfit_items: { items: Item | null }[] };
 

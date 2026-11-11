@@ -20,6 +20,22 @@ export type TripPlan = {
   packing: { item_id: string | null; label: string; quantity: number }[];
 };
 
+export class AiBusyError extends Error {}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Retries when the free AI tier says it's busy (rate limit), waiting longer each time. */
+export async function withRetry<T>(fn: () => Promise<T>, tries = 3, waitMs = 20_000): Promise<T> {
+  for (let n = 1; ; n++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (!(e instanceof AiBusyError) || n >= tries) throw e;
+      await sleep(waitMs * n);
+    }
+  }
+}
+
 async function call<T>(body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke(AI_FUNCTION, { body });
   if (error) {
@@ -27,6 +43,7 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
     const ctx = (error as { context?: Response }).context;
     if (ctx && typeof ctx.json === 'function') {
       const msg = await ctx.json().then((j: { error?: string }) => j?.error).catch(() => null);
+      if (ctx.status === 429) throw new AiBusyError(msg || 'AI is busy, try again in a minute');
       if (msg) throw new Error(msg);
     }
     throw error;
@@ -85,3 +102,39 @@ export async function planTrip(input: {
 }): Promise<TripPlan> {
   return call<TripPlan>({ action: 'trip', ...input, closet: compact(input.closet) });
 }
+
+export type OrderLine = {
+  name: string;
+  brand: string;
+  retailer: string;
+  type: string;
+  colours: string[];
+  size: string;
+  quantity: number;
+  order_date: string | null;
+  formality: string;
+  seasons: string[];
+  occasions: string[];
+  tags: string[];
+  photo_image: number;
+  photo_box: number[] | null;
+};
+
+/** Reads an order (screenshots, a PDF and/or pasted text) and lists the clothing items in it. */
+export async function readOrder(input: {
+  text?: string;
+  images?: { data: string; mimeType: string }[];
+  pdf?: { data: string };
+}): Promise<OrderLine[]> {
+  const data = await withRetry(() =>
+    call<{ items?: OrderLine[] }>({
+      action: 'order',
+      ...input,
+      types: CLOTHING_TYPES,
+      formalities: FORMALITY_LEVELS,
+      seasons: SEASONS,
+    }),
+  );
+  return data.items ?? [];
+}
+
