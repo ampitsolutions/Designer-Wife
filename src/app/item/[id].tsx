@@ -87,16 +87,17 @@ export default function EditItem() {
     }
   }
 
-  async function backToCloset() {
+  async function setStatus(status: Item['status']) {
     if (!item) return;
     try {
-      await setItemStatus(item.id, 'active');
-      setItem({ ...item, status: 'active' });
+      await setItemStatus(item.id, status);
+      setItem({ ...item, status });
       refreshStore();
     } catch (e) {
       Alert.alert('Could not update', e instanceof Error ? e.message : String(e));
     }
   }
+  const backToCloset = () => setStatus('active');
 
   function confirmDelete() {
     Alert.alert('Delete this item?', 'This also removes its photo.', [
@@ -176,6 +177,17 @@ export default function EditItem() {
       {details ? <Text style={styles.details}>{details}</Text> : null}
 
       <ItemForm values={values} onChange={setValues} />
+      {item.status === 'active' && (
+        <View style={styles.asideRow}>
+          <Text style={styles.details}>Not wearing it any more?</Text>
+          <Pressable onPress={() => setStatus('donate')} hitSlop={6}>
+            <Text style={styles.link}>Donate</Text>
+          </Pressable>
+          <Pressable onPress={() => setStatus('sell')} hitSlop={6}>
+            <Text style={styles.link}>Sell</Text>
+          </Pressable>
+        </View>
+      )}
       <View style={[styles.row, { marginTop: 16 }]}>
         <Button title="Delete" variant="danger" onPress={confirmDelete} busy={busy === 'delete'} disabled={!!busy} />
         <Button title="Save" onPress={save} busy={busy === 'save'} disabled={!!busy} />
@@ -199,4 +211,5 @@ const styles = StyleSheet.create({
   wearBtnText: { fontWeight: '600', color: '#111' },
   wearBtnTextOn: { color: '#fff' },
   details: { color: '#666' },
+  asideRow: { flexDirection: 'row', gap: 16, alignItems: 'center', marginTop: 8 },
 });
