@@ -36,8 +36,18 @@ export async function withRetry<T>(fn: () => Promise<T>, tries = 3, waitMs = 20_
   }
 }
 
+/** Longest the app waits for an AI answer before giving up (trip plans take longer). */
+const TIMEOUT_MS: Record<string, number> = { tag: 70_000, outfits: 90_000, order: 120_000, trip: 140_000 };
+
 async function call<T>(body: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke(AI_FUNCTION, { body });
+  const ms = TIMEOUT_MS[String(body.action)] ?? 90_000;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('The AI took too long. Try again.')), ms);
+  });
+  const { data, error } = await Promise.race([supabase.functions.invoke(AI_FUNCTION, { body }), timeout]).finally(() =>
+    clearTimeout(timer),
+  );
   if (error) {
     // Surface the function's own message (e.g. "AI is busy") when there is one.
     const ctx = (error as { context?: Response }).context;

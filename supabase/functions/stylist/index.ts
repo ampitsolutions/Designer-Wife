@@ -11,6 +11,8 @@
 // Secrets (Supabase dashboard → Edge Functions → Secrets):
 //   GEMINI_API_KEY  required
 //   GEMINI_MODEL    optional, default "gemini-3.8-flash"
+//   GEMINI_THINKING optional, Gemini 3 thinking level: minimal | low | medium | high (default "low")
+//   GEMINI_TIMEOUT_MS optional, give up on a Gemini call after this long (default 55000)
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_CLOSET_ITEMS = 600;
@@ -80,25 +82,53 @@ function closetText(closet: ClosetItem[]) {
 
 async function gemini(parts: unknown[], schema: S, temperature = 0.4) {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
-  if (!apiKey) throw new HttpError(500, 'GEMINI_API_KEY is not set');
+  if (!apiKey) {
+    console.error('GEMINI_API_KEY is not set');
+    throw new HttpError(500, 'GEMINI_API_KEY is not set');
+  }
   const model = Deno.env.get('GEMINI_MODEL') || 'gemini-3.8-flash';
+  const timeoutMs = Number(Deno.env.get('GEMINI_TIMEOUT_MS')) || 55_000;
+  // Gemini 3 "thinks" at high effort by default, which is slow; this app needs quick, simple answers.
+  const thinking = model.startsWith('gemini-3') ? { thinkingConfig: { thinkingLevel: Deno.env.get('GEMINI_THINKING') || 'low' } } : {};
 
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-    body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature },
-    }),
-  });
+  const started = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let res: Response;
+  try {
+    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify({
+        contents: [{ parts }],
+        generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature, ...thinking },
+      }),
+    });
+  } catch (e) {
+    console.error(`Gemini ${model} failed after ${Date.now() - started} ms`, String(e));
+    if (controller.signal.aborted) throw new HttpError(504, 'The AI took too long. Try again.');
+    throw new HttpError(502, 'Could not reach the AI');
+  } finally {
+    clearTimeout(timer);
+  }
+  console.log(`Gemini ${model} replied ${res.status} in ${Date.now() - started} ms`);
   if (!res.ok) {
     console.error('Gemini error', res.status, await res.text());
     if (res.status === 429) throw new HttpError(429, 'AI is busy, try again in a minute');
     throw new HttpError(502, `AI request failed (${res.status})`);
   }
   const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new HttpError(502, 'AI returned no result');
+  // Thinking models may return "thought" parts first; use only the answer text.
+  const answer = (data?.candidates?.[0]?.content?.parts ?? [])
+    .filter((p: { text?: string; thought?: boolean }) => typeof p.text === 'string' && !p.thought)
+    .map((p: { text: string }) => p.text)
+    .join('');
+  const text = answer.trim();
+  if (!text) {
+    console.error('Gemini returned no answer', JSON.stringify(data).slice(0, 1500));
+    throw new HttpError(502, 'AI returned no result');
+  }
   try {
     return JSON.parse(text);
   } catch {
