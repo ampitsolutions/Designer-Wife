@@ -10,6 +10,7 @@ import { deleteItem, getItem, setItemPhoto, setItemStatus, updateItem, type Item
 import { deletePhoto, photoUrls, pickPhoto, uploadPhoto } from '@/lib/photos';
 import { listWear, logWear, unlogWear, wornText, type Wear } from '@/lib/wear';
 import { page } from '@/lib/layout';
+import { C, F, R } from '@/theme';
 
 export default function EditItem() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -198,17 +199,17 @@ export default function EditItem() {
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   container: { padding: 16, gap: 12, paddingBottom: 48 },
-  photo: { width: '100%', aspectRatio: 1, borderRadius: 12, backgroundColor: '#f4f4f4' },
+  photo: { width: '100%', aspectRatio: 1, borderRadius: R.md, backgroundColor: C.surface },
   noPhoto: { alignItems: 'center', justifyContent: 'center' },
-  noPhotoText: { color: '#888' },
+  noPhotoText: { color: C.muted },
   row: { flexDirection: 'row', gap: 12 },
-  link: { color: '#0a7aff', fontWeight: '600' },
+  link: { color: C.accentText, fontFamily: F.semibold },
   wearRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  wearText: { color: '#555', flex: 1 },
-  wearBtn: { borderWidth: 1, borderColor: '#111', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 7 },
-  wearBtnOn: { backgroundColor: '#2e7d32', borderColor: '#2e7d32' },
-  wearBtnText: { fontWeight: '600', color: '#111' },
-  wearBtnTextOn: { color: '#fff' },
-  details: { color: '#666' },
+  wearText: { color: C.muted, flex: 1 },
+  wearBtn: { borderWidth: 1, borderColor: C.ink, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 7 },
+  wearBtnOn: { backgroundColor: C.accentText, borderColor: C.accentText },
+  wearBtnText: { fontFamily: F.semibold, color: C.ink },
+  wearBtnTextOn: { color: C.white },
+  details: { color: C.muted },
   asideRow: { flexDirection: 'row', gap: 16, alignItems: 'center', marginTop: 8 },
 });

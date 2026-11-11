@@ -8,6 +8,7 @@ import { formatDate, today } from '@/lib/dates';
 import { findRepeats, listEvents, repeatText, type CalendarEvent } from '@/lib/events';
 import { listOutfits, type Outfit } from '@/lib/outfits';
 import { page } from '@/lib/layout';
+import { C, F, R } from '@/theme';
 
 const monthTitle = (d: string) =>
   new Date(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
@@ -100,18 +101,18 @@ export default function CalendarScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  toggle: { flexDirection: 'row', marginTop: 12, backgroundColor: '#f2f2f2', borderRadius: 10, padding: 3 },
-  seg: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8 },
-  segOn: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } },
-  segText: { color: '#666', fontWeight: '600' },
-  segTextOn: { color: '#111' },
-  section: { fontWeight: '700', fontSize: 16, marginTop: 12, marginBottom: 6, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: C.bg },
+  toggle: { flexDirection: 'row', marginTop: 12, backgroundColor: C.surface, borderRadius: R.pill, padding: 4 },
+  seg: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: R.pill },
+  segOn: { backgroundColor: C.card, shadowColor: C.ink, shadowOpacity: 0.08, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } },
+  segText: { color: C.muted, fontFamily: F.semibold },
+  segTextOn: { color: C.ink },
+  section: { fontFamily: F.semibold, fontSize: 16, marginTop: 12, marginBottom: 6, backgroundColor: C.bg },
   row: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 6 },
-  noOutfit: { width: 64, height: 64, borderRadius: 10, backgroundColor: '#f4f4f4', alignItems: 'center', justifyContent: 'center' },
-  noOutfitText: { color: '#999', fontSize: 11 },
+  noOutfit: { width: 64, height: 64, borderRadius: 10, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' },
+  noOutfitText: { color: C.muted, fontSize: 11 },
   info: { flex: 1, gap: 3 },
-  title: { fontSize: 16, fontWeight: '600' },
-  meta: { color: '#666' },
-  repeat: { color: '#b45309', fontSize: 13 },
+  title: { fontSize: 16, fontFamily: F.semibold },
+  meta: { color: C.muted },
+  repeat: { color: C.warnText, fontSize: 13 },
 });

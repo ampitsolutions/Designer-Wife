@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { C, F, R } from '@/theme';
 
 /** Editable list of short values: tap × to remove, type and press return (or a comma) to add. */
 export function ChipInput({
@@ -51,21 +52,23 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: 6,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: C.borderStrong,
+    borderRadius: R.input,
+    backgroundColor: C.bg,
     padding: 8,
+    minHeight: 48,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: C.surface,
+    borderRadius: R.pill,
+    paddingHorizontal: 12,
+    minHeight: 32,
   },
-  chipText: { color: '#222' },
-  remove: { color: '#888', fontSize: 16, lineHeight: 18 },
-  input: { flexGrow: 1, minWidth: 100, fontSize: 16, paddingVertical: 4 },
+  chipText: { color: C.accentText, fontFamily: F.medium, fontSize: 14 },
+  remove: { color: C.muted, fontSize: 16, lineHeight: 18 },
+  input: { flexGrow: 1, minWidth: 100, fontSize: 16, paddingVertical: 4, fontFamily: F.body, color: C.ink },
 });

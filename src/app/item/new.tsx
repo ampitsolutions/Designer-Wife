@@ -17,6 +17,7 @@ import { usePeople } from '@/lib/people';
 import { Stack } from 'expo-router';
 import { deletePhoto, pickPhoto, uploadPhoto, type PreparedPhoto } from '@/lib/photos';
 import { page } from '@/lib/layout';
+import { C, R } from '@/theme';
 
 type AiState = 'idle' | 'working' | 'done' | 'failed';
 
@@ -114,19 +115,19 @@ export default function NewItem() {
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 12, paddingBottom: 48 },
-  photo: { width: '100%', aspectRatio: 1, borderRadius: 12, backgroundColor: '#f4f4f4' },
+  photo: { width: '100%', aspectRatio: 1, borderRadius: R.md, backgroundColor: C.surface },
   empty: { alignItems: 'center', justifyContent: 'center' },
-  emptyText: { color: '#888' },
+  emptyText: { color: C.muted },
   row: { flexDirection: 'row', gap: 12 },
   saveRow: { marginTop: 16 },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: C.surface,
     borderRadius: 10,
     padding: 12,
   },
-  bannerWarn: { backgroundColor: '#fdf2e9' },
-  bannerText: { color: '#333', flexShrink: 1 },
+  bannerWarn: { backgroundColor: C.warnBg },
+  bannerText: { color: C.ink, flexShrink: 1 },
 });

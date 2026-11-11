@@ -1,53 +1,34 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { C, F, R, T } from '@/theme';
+import { Icon } from './Icon';
 
-/** Round "+" button in the bottom-right corner. */
-export function Fab({ onPress, label = '+' }: { onPress: () => void; label?: string }) {
+/** Neon round "+" icon button in the bottom-right corner (48×48 per the design system, with glow). */
+export function Fab({ onPress, label = 'Add' }: { onPress: () => void; label?: string }) {
   return (
-    <Pressable style={fab.fab} onPress={onPress} accessibilityLabel="Add">
-      <Text style={fab.text}>{label}</Text>
+    <Pressable style={({ pressed }) => [ui.fab, pressed && { opacity: 0.85 }]} onPress={onPress} accessibilityLabel={label} accessibilityRole="button">
+      <Icon name="plus" size={26} color={C.onPrimary} />
     </Pressable>
   );
 }
 
-/** Small grey box for status messages (loading, AI results, errors). */
+/** Tinted box for status messages (loading, AI results, errors). */
 export function Banner({ children, tone = 'info' }: { children: React.ReactNode; tone?: 'info' | 'warn' }) {
-  return <View style={[fab.banner, tone === 'warn' && fab.warn]}>{children}</View>;
+  return <View style={[ui.banner, tone === 'warn' && ui.warn]}>{children}</View>;
 }
 
 export function Empty({ title, note }: { title: string; note?: string }) {
   return (
-    <View style={fab.empty}>
-      <Text style={fab.emptyTitle}>{title}</Text>
-      {note ? <Text style={fab.emptyNote}>{note}</Text> : null}
+    <View style={ui.empty}>
+      <Text style={ui.emptyTitle}>{title}</Text>
+      {note ? <Text style={ui.emptyNote}>{note}</Text> : null}
     </View>
   );
 }
 
-const fab = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#111',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  text: { color: '#fff', fontSize: 30, lineHeight: 32 },
-  banner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#f4f4f4', borderRadius: 10, padding: 12 },
-  warn: { backgroundColor: '#fdf2e9' },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 8 },
-  emptyTitle: { fontSize: 18, fontWeight: '600', textAlign: 'center' },
-  emptyNote: { color: '#666', textAlign: 'center' },
-});
-
+/**
+ * Pill button, 48 high.
+ * primary = neon, secondary = outline, soft = tinted, danger = red outline.
+ */
 export function Button({
   title,
   onPress,
@@ -59,30 +40,60 @@ export function Button({
   onPress: () => void;
   busy?: boolean;
   disabled?: boolean;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'soft' | 'danger';
 }) {
   const off = disabled || busy;
+  const textStyle = { primary: ui.textPrimary, secondary: ui.textOutline, soft: ui.textSoft, danger: ui.textDanger }[variant];
   return (
     <Pressable
       onPress={onPress}
       disabled={off}
-      style={[styles.base, styles[variant], off && styles.disabled]}
+      accessibilityRole="button"
+      style={({ pressed }) => [ui.base, ui[variant], off && ui.disabled, pressed && !off && { opacity: 0.85 }]}
     >
       {busy ? (
-        <ActivityIndicator color={variant === 'secondary' ? '#111' : '#fff'} />
+        <ActivityIndicator color={variant === 'primary' ? C.onPrimary : C.ink} />
       ) : (
-        <Text style={[styles.text, variant === 'secondary' && styles.textDark]}>{title}</Text>
+        <Text style={[ui.text, textStyle]} numberOfLines={1}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  base: { borderRadius: 10, padding: 14, alignItems: 'center', flex: 1 },
-  primary: { backgroundColor: '#111' },
-  secondary: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#111' },
-  danger: { backgroundColor: '#c0392b' },
-  disabled: { opacity: 0.5 },
-  text: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  textDark: { color: '#111' },
+const ui = StyleSheet.create({
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: R.pill,
+    backgroundColor: C.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: C.primary,
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  banner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: C.surface, borderRadius: R.md, padding: 12 },
+  warn: { backgroundColor: C.warnBg },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 8 },
+  emptyTitle: { ...T.cardTitle, textAlign: 'center' },
+  emptyNote: { ...T.meta, fontSize: 15, textAlign: 'center', lineHeight: 22 },
+
+  base: { minHeight: 48, borderRadius: R.pill, paddingHorizontal: 24, alignItems: 'center', justifyContent: 'center', flex: 1 },
+  primary: { backgroundColor: C.primary },
+  secondary: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: C.ink },
+  soft: { backgroundColor: C.surface },
+  danger: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: C.danger },
+  disabled: { opacity: 0.45 },
+  text: { fontFamily: F.semibold, fontSize: 15 },
+  textPrimary: { color: C.onPrimary },
+  textOutline: { color: C.ink },
+  textSoft: { color: C.accentText },
+  textDanger: { color: C.danger },
 });

@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase';
 import { listDayItems, listMembers, setMyDayItems, updateDay, type DayItem, type TripDay } from '@/lib/trips';
 import { weatherLine } from '@/lib/weather';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase } from '@/theme';
 
 /** One trip day: my outfit for the day and what's planned. */
 export default function TripDayScreen() {
@@ -148,18 +149,18 @@ export default function TripDayScreen() {
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   container: { padding: 16, gap: 8, paddingBottom: 48 },
-  weather: { fontSize: 16, color: '#333' },
-  note: { color: '#6b5b2e', fontStyle: 'italic' },
-  label: { fontWeight: '600', marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 16 },
+  weather: { fontSize: 16, color: C.ink },
+  note: { color: C.accentText, fontStyle: 'italic' },
+  label: { fontFamily: F.semibold, marginTop: 12 },
+  input: { ...inputBase },
   multiline: { minHeight: 80, textAlignVertical: 'top' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   remove: {
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    color: '#fff',
+    backgroundColor: C.overlay,
+    color: C.white,
     width: 22,
     height: 22,
     borderRadius: 11,
@@ -173,13 +174,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#999',
+    borderColor: C.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addPlus: { fontSize: 28, color: '#555' },
+  addPlus: { fontSize: 28, color: C.muted },
   row: { flexDirection: 'row', gap: 12, marginTop: 24 },
   pickerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 4 },
-  pickerTitle: { fontSize: 18, fontWeight: '700' },
-  done: { fontSize: 17, fontWeight: '600', color: '#0a7aff' },
+  pickerTitle: { fontSize: 18, fontFamily: F.display },
+  done: { fontSize: 17, fontFamily: F.semibold, color: C.accentText },
 });

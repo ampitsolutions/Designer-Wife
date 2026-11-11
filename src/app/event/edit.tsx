@@ -10,6 +10,7 @@ import { today } from '@/lib/dates';
 import { createEvent, deleteEvent, findRepeats, getEvent, listEvents, repeatText, updateEvent, type CalendarEvent } from '@/lib/events';
 import { listOutfits, type Outfit } from '@/lib/outfits';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase } from '@/theme';
 
 /** New event (no id) or edit (?id=…). */
 export default function EditEvent() {
@@ -121,7 +122,7 @@ export default function EditEvent() {
         {repeats.length > 0 && (
           <Banner tone="warn">
             <View style={{ flexShrink: 1, gap: 2 }}>
-              <Text style={{ fontWeight: '600' }}>Repeat outfit</Text>
+              <Text style={{ fontFamily: F.semibold }}>Repeat outfit</Text>
               {repeats.slice(0, 3).map((r) => (
                 <Text key={r.event.id}>{repeatText(r)}</Text>
               ))}
@@ -197,19 +198,19 @@ export default function EditEvent() {
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   container: { padding: 16, gap: 8, paddingBottom: 48 },
-  label: { fontWeight: '600', marginTop: 10 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 16 },
+  label: { fontFamily: F.semibold, marginTop: 10 },
+  input: { ...inputBase },
   multiline: { minHeight: 80, textAlignVertical: 'top' },
-  outfitRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 10 },
+  outfitRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: C.borderStrong, borderRadius: 10, padding: 10 },
   outfitText: { flex: 1, fontSize: 16 },
-  clear: { color: '#0a7aff' },
+  clear: { color: C.accentText },
   buttons: { flexDirection: 'row', gap: 12, marginTop: 24 },
   pickerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 4 },
-  pickerTitle: { fontSize: 18, fontWeight: '700' },
-  done: { fontSize: 17, fontWeight: '600', color: '#0a7aff' },
+  pickerTitle: { fontSize: 18, fontFamily: F.display },
+  done: { fontSize: 17, fontFamily: F.semibold, color: C.accentText },
   pickRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 8, borderRadius: 12 },
-  pickRowOn: { backgroundColor: '#f2f2f2' },
-  meta: { color: '#666' },
-  repeat: { color: '#b45309', fontSize: 13 },
-  star: { color: '#c9a227', fontSize: 20 },
+  pickRowOn: { backgroundColor: C.surface },
+  meta: { color: C.muted },
+  repeat: { color: C.warnText, fontSize: 13 },
+  star: { color: C.star, fontSize: 20 },
 });

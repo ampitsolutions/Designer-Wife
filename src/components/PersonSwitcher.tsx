@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import type { Person } from '@/lib/people';
+import { C, F, R } from '@/theme';
 
 /** "Whose closet" chips. Renders nothing when there's only your own closet. */
 export function PersonSwitcher({
@@ -35,8 +36,8 @@ export function PersonSwitcher({
 
 const styles = StyleSheet.create({
   row: { gap: 8, paddingVertical: 4 },
-  chip: { borderWidth: 1, borderColor: '#d8cbb8', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
-  on: { backgroundColor: '#6b4f2a', borderColor: '#6b4f2a' },
-  text: { color: '#6b4f2a', fontWeight: '600' },
-  textOn: { color: '#fff' },
+  chip: { borderWidth: 1.5, borderColor: C.borderStrong, backgroundColor: C.card, borderRadius: R.pill, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center' },
+  on: { backgroundColor: C.ink, borderColor: C.ink },
+  text: { color: C.accentText, fontFamily: F.semibold },
+  textOn: { color: C.white },
 });

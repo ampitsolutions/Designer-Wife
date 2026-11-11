@@ -9,9 +9,11 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { LogoMark } from '@/components/Icon';
 import { APP_NAME } from '@/config';
 import { isConfigured, supabase } from '@/lib/supabase';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase, R } from '@/theme';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -33,12 +35,19 @@ export default function SignIn() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[page, styles.inner]}>
-      <Text style={styles.title}>{APP_NAME}</Text>
+      <View style={styles.brand}>
+        <LogoMark size={72} />
+        <Text style={styles.title} accessibilityLabel={APP_NAME}>
+          Designer <Text style={styles.titleItalic}>Wife</Text>
+        </Text>
+        <Text style={styles.tagline}>Your closet, styled.</Text>
+      </View>
       {!isConfigured && (
         <Text style={styles.error}>Supabase is not configured. Add your keys to .env.</Text>
       )}
       <TextInput
         style={styles.input}
+        placeholderTextColor={C.muted}
         placeholder="Email"
         autoCapitalize="none"
         autoComplete="email"
@@ -48,6 +57,7 @@ export default function SignIn() {
       />
       <TextInput
         style={styles.input}
+        placeholderTextColor={C.muted}
         placeholder="Password"
         secureTextEntry
         autoComplete="password"
@@ -60,7 +70,7 @@ export default function SignIn() {
         onPress={signIn}
         disabled={busy || !email || !password}
       >
-        {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in</Text>}
+        {busy ? <ActivityIndicator color={C.onPrimary} /> : <Text style={styles.buttonText}>Sign in</Text>}
       </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -68,12 +78,15 @@ export default function SignIn() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
+  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: C.bg },
   inner: { maxWidth: 420, gap: 12 },
-  title: { fontSize: 32, fontWeight: '700', textAlign: 'center', marginBottom: 24 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 14, fontSize: 16 },
-  button: { backgroundColor: '#111', borderRadius: 10, padding: 16, alignItems: 'center' },
+  brand: { alignItems: 'center', gap: 8, marginBottom: 24 },
+  title: { fontSize: 44, fontFamily: F.display, color: C.ink, textAlign: 'center' },
+  titleItalic: { fontFamily: F.displayItalic, color: C.accentText },
+  tagline: { fontFamily: F.body, fontSize: 16, color: C.muted },
+  input: { ...inputBase },
+  button: { backgroundColor: C.primary, borderRadius: R.pill, minHeight: 48, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
   disabled: { opacity: 0.5 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  error: { color: '#c0392b', textAlign: 'center' },
+  buttonText: { color: C.onPrimary, fontSize: 15, fontFamily: F.semibold },
+  error: { color: C.danger, textAlign: 'center', fontFamily: F.body },
 });

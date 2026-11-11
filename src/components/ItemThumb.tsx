@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { usePhotoUrls } from '@/lib/closet';
 import type { Item } from '@/lib/items';
+import { C, F, R } from '@/theme';
 
 /** Square item photo. The cache key is the storage key, so it stays cached across link refreshes. */
 export function ItemThumb({
@@ -57,8 +58,8 @@ export function OutfitCollage({ items, size }: { items: Item[]; size: number }) 
 }
 
 const styles = StyleSheet.create({
-  box: { borderRadius: 8, overflow: 'hidden', backgroundColor: '#f4f4f4', alignItems: 'center', justifyContent: 'center' },
-  fallback: { color: '#888', fontSize: 12, textAlign: 'center', padding: 4 },
+  box: { borderRadius: R.sm, overflow: 'hidden', backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' },
+  fallback: { color: C.muted, fontSize: 12, textAlign: 'center', padding: 4 },
   tick: {
     position: 'absolute',
     top: 6,
@@ -66,20 +67,20 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#111',
+    backgroundColor: C.ink,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: C.white,
   },
-  tickText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  tickText: { color: C.white, fontSize: 13, fontFamily: F.semibold },
   collage: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 2,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#f4f4f4',
+    backgroundColor: C.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },

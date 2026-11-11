@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { formatRange, today } from '@/lib/dates';
 import { listTrips, type Trip } from '@/lib/trips';
 import { page } from '@/lib/layout';
+import { C, F, R } from '@/theme';
 
 export default function TripsScreen() {
   const { session } = useAuth();
@@ -75,10 +76,10 @@ export default function TripsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  section: { fontWeight: '700', fontSize: 16, marginTop: 12 },
-  card: { borderWidth: 1, borderColor: '#eee', borderRadius: 12, padding: 14, gap: 4 },
-  name: { fontSize: 17, fontWeight: '700' },
-  meta: { color: '#555' },
-  shared: { color: '#8a6d1c', fontSize: 13 },
+  container: { flex: 1, backgroundColor: C.bg },
+  section: { fontFamily: F.semibold, fontSize: 16, marginTop: 12 },
+  card: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: R.lg, padding: 16, gap: 4 },
+  name: { fontSize: 22, fontFamily: F.display, color: C.ink },
+  meta: { color: C.muted },
+  shared: { color: C.accentText, fontSize: 13 },
 });

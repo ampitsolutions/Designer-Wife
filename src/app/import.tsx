@@ -14,6 +14,7 @@ import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { boxToCrop, deletePhoto, pickMany, prepare, uploadPhoto, type PreparedPhoto, type RawPhoto } from '@/lib/photos';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase } from '@/theme';
 
 const MAX_SHOTS = 6;
 const MAX_PDF_BYTES = 8 * 1024 * 1024;
@@ -233,20 +234,20 @@ export default function ImportOrder() {
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 10, paddingBottom: 48 },
-  hint: { color: '#555' },
-  label: { fontWeight: '600', marginTop: 8 },
+  hint: { color: C.muted },
+  label: { fontFamily: F.semibold, marginTop: 8 },
   row: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 15 },
+  input: { ...inputBase },
   multiline: { minHeight: 140, textAlignVertical: 'top' },
-  shot: { width: 72, height: 128, borderRadius: 8, backgroundColor: '#f4f4f4' },
-  addShot: { borderWidth: 1, borderStyle: 'dashed', borderColor: '#999', alignItems: 'center', justifyContent: 'center' },
-  addPlus: { fontSize: 28, color: '#555' },
+  shot: { width: 72, height: 128, borderRadius: 8, backgroundColor: C.surface },
+  addShot: { borderWidth: 1, borderStyle: 'dashed', borderColor: C.borderStrong, alignItems: 'center', justifyContent: 'center' },
+  addPlus: { fontSize: 28, color: C.muted },
   remove: {
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    color: '#fff',
+    backgroundColor: C.overlay,
+    color: C.white,
     width: 22,
     height: 22,
     borderRadius: 11,
@@ -254,16 +255,16 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     overflow: 'hidden',
   },
-  pdfRow: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12 },
-  link: { color: '#0a7aff' },
+  pdfRow: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: C.borderStrong, borderRadius: 10, padding: 12 },
+  link: { color: C.accentText },
   line: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   lineOff: { opacity: 0.4 },
-  box: { width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: '#999', alignItems: 'center', justifyContent: 'center' },
-  boxOn: { backgroundColor: '#111', borderColor: '#111' },
-  check: { color: '#fff', fontWeight: '700' },
-  thumb: { width: 64, height: 64, borderRadius: 8, backgroundColor: '#f4f4f4' },
+  box: { width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: C.borderStrong, alignItems: 'center', justifyContent: 'center' },
+  boxOn: { backgroundColor: C.ink, borderColor: C.ink },
+  check: { color: C.white, fontFamily: F.semibold },
+  thumb: { width: 64, height: 64, borderRadius: 8, backgroundColor: C.surface },
   noThumb: { alignItems: 'center', justifyContent: 'center' },
-  noThumbText: { color: '#999', fontSize: 11 },
-  nameInput: { fontSize: 16, fontWeight: '600', paddingVertical: 2, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  meta: { color: '#666', fontSize: 13 },
+  noThumbText: { color: C.muted, fontSize: 11 },
+  nameInput: { fontSize: 16, fontFamily: F.semibold, paddingVertical: 2, borderBottomWidth: 1, borderBottomColor: C.border },
+  meta: { color: C.muted, fontSize: 13 },
 });

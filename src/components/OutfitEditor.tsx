@@ -11,6 +11,7 @@ import { ClosetBrowser } from './ClosetBrowser';
 import { ItemThumb } from './ItemThumb';
 import { Button } from './ui';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase } from '@/theme';
 
 /**
  * Create or edit an outfit. Pass `outfit` to edit; `initial` to prefill a new one (e.g. from AI ideas).
@@ -181,8 +182,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    color: '#fff',
+    backgroundColor: C.overlay,
+    color: C.white,
     width: 22,
     height: 22,
     borderRadius: 11,
@@ -196,21 +197,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: '#999',
+    borderColor: C.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addPlus: { fontSize: 28, color: '#555' },
-  addText: { color: '#555' },
-  label: { fontWeight: '600', marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 16 },
+  addPlus: { fontSize: 28, color: C.muted },
+  addText: { color: C.muted },
+  label: { fontFamily: F.semibold, marginTop: 12 },
+  input: { ...inputBase },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, gap: 12 },
   switchLabel: { fontSize: 16 },
-  meta: { color: '#666' },
+  meta: { color: C.muted },
   buttons: { flexDirection: 'row', gap: 12, marginTop: 24 },
   readOnly: { gap: 6, marginTop: 12 },
-  title: { fontSize: 20, fontWeight: '700' },
+  title: { fontSize: 20, fontFamily: F.display },
   pickerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingBottom: 4 },
-  pickerTitle: { fontSize: 18, fontWeight: '700' },
-  done: { fontSize: 17, fontWeight: '600', color: '#0a7aff' },
+  pickerTitle: { fontSize: 18, fontFamily: F.display },
+  done: { fontSize: 17, fontFamily: F.semibold, color: C.accentText },
 });

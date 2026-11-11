@@ -1,0 +1,39 @@
+/* Designer Wife — Neon green tokens */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  /* Colour */
+  --dw-primary: #39FF14;
+  --dw-on-primary: #0D140F;
+  --dw-accent-text: #0E7A2E;
+  --dw-accent-text-hover: #08561F;
+  --dw-surface: #E6FFDD;
+  --dw-surface-strong: #CFF2C2;
+  --dw-bg: #F7FBF5;
+  --dw-card: #FFFFFF;
+  --dw-border: #D6EBCF;
+  --dw-border-strong: #BFD9B5;
+  --dw-ink: #0D140F;
+  --dw-muted: #4F5E53;
+
+  /* Type */
+  --dw-font-display: 'Playfair Display', Georgia, serif;
+  --dw-font-ui: 'DM Sans', system-ui, sans-serif;
+
+  /* Spacing */
+  --dw-space-1: 4px;
+  --dw-space-2: 8px;
+  --dw-space-3: 16px;
+  --dw-space-4: 24px;
+  --dw-space-5: 32px;
+  --dw-space-6: 48px;
+
+  /* Radius */
+  --dw-radius-sm: 10px;
+  --dw-radius-md: 16px;
+  --dw-radius-lg: 24px;
+  --dw-radius-pill: 999px;
+
+  /* Elevation */
+  --dw-shadow-icon: 0 18px 40px rgba(57, 255, 20, 0.35);
+}

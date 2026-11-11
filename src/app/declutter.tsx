@@ -12,6 +12,7 @@ import { deleteItem, setItemStatus, type Item, type ItemStatus } from '@/lib/ite
 import { deletePhoto } from '@/lib/photos';
 import { logWear, useWear } from '@/lib/wear';
 import { page } from '@/lib/layout';
+import { C, F, R } from '@/theme';
 
 type Tab = 'suggest' | 'donate' | 'sell';
 
@@ -149,20 +150,20 @@ export default function Declutter() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  tabs: { flexDirection: 'row', marginTop: 12, backgroundColor: '#f2f2f2', borderRadius: 10, padding: 3 },
-  tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8 },
-  tabOn: { backgroundColor: '#fff' },
-  tabText: { color: '#666', fontWeight: '600' },
-  tabTextOn: { color: '#111' },
-  hint: { color: '#666', marginBottom: 4 },
+  container: { flex: 1, backgroundColor: C.bg },
+  tabs: { flexDirection: 'row', marginTop: 12, backgroundColor: C.surface, borderRadius: R.pill, padding: 4 },
+  tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: R.pill },
+  tabOn: { backgroundColor: C.card },
+  tabText: { color: C.muted, fontFamily: F.semibold },
+  tabTextOn: { color: C.ink },
+  hint: { color: C.muted, marginBottom: 4 },
   row: { flexDirection: 'row', gap: 12 },
   info: { flex: 1, gap: 4 },
-  name: { fontSize: 16, fontWeight: '600' },
-  reason: { color: '#b45309' },
+  name: { fontSize: 16, fontFamily: F.semibold },
+  reason: { color: C.warnText },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
-  action: { borderWidth: 1, borderColor: '#ccc', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5 },
-  actionText: { color: '#222', fontSize: 13 },
-  actionDanger: { borderColor: '#c0392b' },
-  actionDangerText: { color: '#c0392b' },
+  action: { borderWidth: 1, borderColor: C.borderStrong, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5 },
+  actionText: { color: C.ink, fontSize: 13 },
+  actionDanger: { borderColor: C.danger },
+  actionDangerText: { color: C.danger },
 });

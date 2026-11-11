@@ -18,6 +18,7 @@ import type { Item } from '@/lib/items';
 import { Button } from './ui';
 import { ItemThumb } from './ItemThumb';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase, R } from '@/theme';
 
 const GAP = 4;
 
@@ -174,23 +175,23 @@ export function ClosetBrowser({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: C.bg },
   searchRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 8, paddingTop: 8 },
-  search: { flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
-  filterBtn: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, paddingHorizontal: 12, justifyContent: 'center' },
-  filterBtnOn: { backgroundColor: '#111', borderColor: '#111' },
-  filterText: { color: '#333', fontWeight: '600' },
+  search: { ...inputBase, flex: 1 },
+  filterBtn: { borderWidth: 1, borderColor: C.borderStrong, borderRadius: 10, paddingHorizontal: 12, justifyContent: 'center' },
+  filterBtnOn: { backgroundColor: C.ink, borderColor: C.ink },
+  filterText: { color: C.ink, fontFamily: F.semibold },
   typeBar: { gap: 6, paddingHorizontal: 8, paddingTop: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderWidth: 1, borderColor: '#ddd', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
-  chipOn: { backgroundColor: '#111', borderColor: '#111' },
-  chipText: { color: '#333' },
-  chipTextOn: { color: '#fff' },
+  chip: { borderWidth: 1.5, borderColor: C.borderStrong, backgroundColor: C.card, borderRadius: R.pill, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center' },
+  chipOn: { backgroundColor: C.ink, borderColor: C.ink },
+  chipText: { color: C.ink },
+  chipTextOn: { color: C.white },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  emptyText: { color: '#666', textAlign: 'center' },
+  emptyText: { color: C.muted, textAlign: 'center' },
   sheet: { padding: 20, gap: 10, paddingBottom: 48 },
-  sheetTitle: { fontSize: 22, fontWeight: '700' },
-  label: { fontWeight: '600', marginTop: 12 },
-  hint: { color: '#888' },
+  sheetTitle: { fontSize: 22, fontFamily: F.display },
+  label: { fontFamily: F.semibold, marginTop: 12 },
+  hint: { color: C.muted },
   sheetButtons: { flexDirection: 'row', gap: 12, marginTop: 24 },
 });

@@ -9,6 +9,7 @@ import { usePeople } from '@/lib/people';
 import { listProfiles, profileName, type Profile } from '@/lib/profiles';
 import { addPacking, deletePacking, listPacking, setPacked, type PackingItem } from '@/lib/trips';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase } from '@/theme';
 
 export default function PackingList() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -148,18 +149,18 @@ export default function PackingList() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: C.bg },
   addRow: { flexDirection: 'row', gap: 8, padding: 12, paddingBottom: 0 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
+  input: { ...inputBase },
   qty: { width: 52, textAlign: 'center' },
-  addBtn: { backgroundColor: '#111', borderRadius: 10, paddingHorizontal: 14, justifyContent: 'center' },
-  addText: { color: '#fff', fontWeight: '600' },
-  section: { fontWeight: '700', fontSize: 15, marginTop: 16, marginBottom: 6, backgroundColor: '#fff' },
+  addBtn: { backgroundColor: C.ink, borderRadius: 10, paddingHorizontal: 14, justifyContent: 'center' },
+  addText: { color: C.white, fontFamily: F.semibold },
+  section: { fontFamily: F.semibold, fontSize: 15, marginTop: 16, marginBottom: 6, backgroundColor: C.bg },
   line: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
-  box: { width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: '#999', alignItems: 'center', justifyContent: 'center' },
-  boxOn: { backgroundColor: '#2e7d32', borderColor: '#2e7d32' },
-  check: { color: '#fff', fontWeight: '700' },
+  box: { width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: C.borderStrong, alignItems: 'center', justifyContent: 'center' },
+  boxOn: { backgroundColor: C.accentText, borderColor: C.accentText },
+  check: { color: C.white, fontFamily: F.semibold },
   label: { flex: 1, fontSize: 16 },
-  packed: { color: '#999', textDecorationLine: 'line-through' },
-  hint: { color: '#888', textAlign: 'center', marginTop: 16 },
+  packed: { color: C.muted, textDecorationLine: 'line-through' },
+  hint: { color: C.muted, textAlign: 'center', marginTop: 16 },
 });

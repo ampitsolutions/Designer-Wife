@@ -9,6 +9,7 @@ import type { Item } from '@/lib/items';
 import { usePeople } from '@/lib/people';
 import { PersonSwitcher } from '@/components/PersonSwitcher';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase, R } from '@/theme';
 
 const EXAMPLES = ['Office day', 'Friend’s wedding (evening)', 'Weekend brunch', 'Diwali party', 'Date night'];
 
@@ -134,13 +135,13 @@ export default function OutfitIdeas() {
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 12, paddingBottom: 48 },
-  label: { fontWeight: '600', fontSize: 16 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 16 },
+  label: { fontFamily: F.semibold, fontSize: 16 },
+  input: { ...inputBase },
   examples: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  example: { backgroundColor: '#f4f4f4', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 6 },
-  exampleText: { color: '#333' },
+  example: { backgroundColor: C.surface, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 6 },
+  exampleText: { color: C.ink },
   row: { flexDirection: 'row', gap: 12 },
-  card: { borderWidth: 1, borderColor: '#eee', borderRadius: 12, padding: 12, gap: 8 },
-  cardTitle: { fontSize: 17, fontWeight: '700' },
-  reason: { color: '#555' },
+  card: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: R.lg, padding: 16, gap: 10 },
+  cardTitle: { fontSize: 22, fontFamily: F.display, color: C.ink },
+  reason: { color: C.muted },
 });

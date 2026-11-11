@@ -9,6 +9,7 @@ import { today } from '@/lib/dates';
 import { declutterSuggestions } from '@/lib/declutter';
 import { usePeople } from '@/lib/people';
 import { useWear } from '@/lib/wear';
+import { C, F, R } from '@/theme';
 
 function Tool({ label, onPress }: { label: string; onPress: () => void }) {
   return (
@@ -72,10 +73,10 @@ export default function ClosetScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: C.bg },
   retry: { alignSelf: 'center', marginBottom: 48 },
-  retryText: { fontWeight: '600' },
+  retryText: { fontFamily: F.semibold },
   tools: { gap: 8, paddingBottom: 6 },
-  tool: { backgroundColor: '#f6f1ea', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 },
-  toolText: { fontWeight: '600', color: '#333' },
+  tool: { backgroundColor: C.surface, borderRadius: R.pill, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center' },
+  toolText: { fontFamily: F.semibold, color: C.accentText },
 });

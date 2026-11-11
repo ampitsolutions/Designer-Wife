@@ -3,6 +3,7 @@ import { CLOTHING_TYPES, FORMALITY_LEVELS, SEASONS } from '@/config';
 import type { TagSuggestion } from '@/lib/ai';
 import type { Item, ItemFields } from '@/lib/items';
 import { ChipInput } from './ChipInput';
+import { C, F, input as inputBase, R } from '@/theme';
 
 export type ItemFormValues = {
   name: string;
@@ -165,12 +166,12 @@ export function ItemForm({
 
 const styles = StyleSheet.create({
   form: { gap: 8 },
-  label: { fontWeight: '600', marginTop: 8 },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 16 },
+  label: { fontFamily: F.semibold, marginTop: 8 },
+  input: { ...inputBase },
   notes: { minHeight: 80, textAlignVertical: 'top' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderWidth: 1, borderColor: '#ddd', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
-  chipOn: { backgroundColor: '#111', borderColor: '#111' },
-  chipText: { color: '#333' },
-  chipTextOn: { color: '#fff' },
+  chip: { borderWidth: 1.5, borderColor: C.borderStrong, backgroundColor: C.card, borderRadius: R.pill, paddingHorizontal: 14, minHeight: 36, justifyContent: 'center' },
+  chipOn: { backgroundColor: C.ink, borderColor: C.ink },
+  chipText: { color: C.ink },
+  chipTextOn: { color: C.white },
 });

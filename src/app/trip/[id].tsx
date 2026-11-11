@@ -26,6 +26,7 @@ import {
 } from '@/lib/trips';
 import { describe, tripWeather, weatherLine } from '@/lib/weather';
 import { page } from '@/lib/layout';
+import { C, F, R } from '@/theme';
 
 export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -310,28 +311,28 @@ export default function TripDetail() {
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   container: { padding: 16, gap: 12, paddingBottom: 48 },
-  headerBtn: { fontSize: 17, color: '#0a7aff' },
-  meta: { color: '#555' },
+  headerBtn: { fontSize: 17, color: C.accentText },
+  meta: { color: C.muted },
   row: { flexDirection: 'row', gap: 12 },
   shareRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: C.border,
     borderRadius: 10,
     padding: 12,
   },
   shareText: { fontSize: 15 },
-  shareAction: { color: '#0a7aff', fontWeight: '600' },
-  day: { borderWidth: 1, borderColor: '#eee', borderRadius: 12, padding: 12, gap: 6 },
+  shareAction: { color: C.accentText, fontFamily: F.semibold },
+  day: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: R.lg, padding: 16, gap: 8 },
   dayHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  dayDate: { fontSize: 16, fontWeight: '700' },
-  weather: { color: '#333' },
-  activities: { color: '#333' },
-  note: { color: '#6b5b2e', fontStyle: 'italic' },
-  hint: { color: '#888' },
-  who: { fontSize: 12, fontWeight: '600', color: '#6b4f2a' },
+  dayDate: { fontSize: 20, fontFamily: F.display, color: C.ink },
+  weather: { color: C.ink },
+  activities: { color: C.ink },
+  note: { color: C.accentText, fontStyle: 'italic' },
+  hint: { color: C.muted },
+  who: { fontSize: 12, fontFamily: F.semibold, color: C.accentText },
   refresh: { alignSelf: 'center', padding: 8 },
-  refreshText: { color: '#0a7aff' },
+  refreshText: { color: C.accentText },
 });

@@ -7,6 +7,7 @@ import { usePeople } from '@/lib/people';
 import { ensureUrls } from '@/lib/closet';
 import { listOutfits, setFavourite, type Outfit } from '@/lib/outfits';
 import { page } from '@/lib/layout';
+import { C, F, R, T } from '@/theme';
 
 export default function OutfitsScreen() {
   const { people, canManage, nameOf } = usePeople();
@@ -74,15 +75,18 @@ export default function OutfitsScreen() {
           const isMine = canManage(o.owner_id);
           return (
             <Pressable style={styles.row} onPress={() => router.push(`/outfit/${o.id}`)}>
-              <OutfitCollage items={o.items} size={84} />
+              <OutfitCollage items={o.items} size={96} />
               <View style={styles.info}>
-                <Text style={styles.name} numberOfLines={1}>
+                {o.occasion ? (
+                  <Text style={styles.overline} numberOfLines={1}>
+                    {o.occasion}
+                  </Text>
+                ) : null}
+                <Text style={styles.name} numberOfLines={2}>
                   {o.name || 'Untitled outfit'}
                 </Text>
                 <Text style={styles.meta} numberOfLines={1}>
                   {[
-                    o.occasion,
-                    `${o.items.length} item${o.items.length === 1 ? '' : 's'}`,
                     isMine && o.shared ? 'Shared' : null,
                     !isMine ? `by ${nameOf(o.owner_id)}` : null,
                   ]
@@ -113,14 +117,15 @@ export default function OutfitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  ideas: { backgroundColor: '#f6f1ea', borderRadius: 12, padding: 14, gap: 4 },
-  ideasTitle: { fontWeight: '700', fontSize: 16 },
-  ideasNote: { color: '#555' },
-  section: { fontWeight: '700', fontSize: 16, marginTop: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  container: { flex: 1, backgroundColor: C.bg },
+  ideas: { backgroundColor: C.surface, borderRadius: R.lg, padding: 16, gap: 4 },
+  ideasTitle: { fontFamily: F.semibold, fontSize: 16 },
+  ideasNote: { color: C.muted },
+  section: { ...T.overline, color: C.muted, marginTop: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: R.lg, padding: 16 },
   info: { flex: 1, gap: 4 },
-  name: { fontSize: 16, fontWeight: '600' },
-  meta: { color: '#666' },
-  star: { fontSize: 26, color: '#c9a227', paddingHorizontal: 4 },
+  name: { ...T.cardTitle },
+  overline: { ...T.overline },
+  meta: { ...T.meta },
+  star: { fontSize: 26, color: C.star, paddingHorizontal: 4 },
 });

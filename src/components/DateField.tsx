@@ -2,6 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatDate, fromISODate, toISODate } from '@/lib/dates';
+import { C } from '@/theme';
 
 /** Tap to pick a date. Value is "YYYY-MM-DD" or null. */
 export function DateField({
@@ -45,7 +46,7 @@ export function DateField({
 }
 
 const styles = StyleSheet.create({
-  field: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12 },
-  value: { fontSize: 16, color: '#111' },
-  placeholder: { fontSize: 16, color: '#999' },
+  field: { borderWidth: 1, borderColor: C.borderStrong, borderRadius: 10, padding: 12 },
+  value: { fontSize: 16, color: C.ink },
+  placeholder: { fontSize: 16, color: C.muted },
 });

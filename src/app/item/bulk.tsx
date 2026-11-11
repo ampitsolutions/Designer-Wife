@@ -11,6 +11,7 @@ import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { deletePhoto, pickMany, prepare, uploadPhoto, type RawPhoto } from '@/lib/photos';
 import { page } from '@/lib/layout';
+import { C, F } from '@/theme';
 
 type Status = 'waiting' | 'working' | 'done' | 'no-tags' | 'failed';
 type Row = { key: string; raw: RawPhoto; status: Status; itemId?: string; name?: string; error?: string };
@@ -179,9 +180,9 @@ const styles = StyleSheet.create({
   list: { padding: 12, gap: 8, paddingBottom: 48 },
   row: { flexDirection: 'row', gap: 10 },
   item: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  thumb: { width: 56, height: 56, borderRadius: 8, backgroundColor: '#f4f4f4' },
-  name: { fontSize: 16, fontWeight: '600' },
-  status: { color: '#666', fontSize: 13 },
-  bad: { color: '#b91c1c' },
-  tick: { color: '#2e7d32', fontSize: 18, fontWeight: '700' },
+  thumb: { width: 56, height: 56, borderRadius: 8, backgroundColor: C.surface },
+  name: { fontSize: 16, fontFamily: F.semibold },
+  status: { color: C.muted, fontSize: 13 },
+  bad: { color: C.danger },
+  tick: { color: C.accentText, fontSize: 18, fontFamily: F.display },
 });

@@ -9,6 +9,7 @@ import { daysBetween } from '@/lib/dates';
 import { createTrip, deleteTrip, getTrip, updateTrip, type Trip } from '@/lib/trips';
 import { findPlace } from '@/lib/weather';
 import { page } from '@/lib/layout';
+import { C, F, input as inputBase } from '@/theme';
 
 /** New trip (no id) or edit trip (?id=…). */
 export default function EditTrip() {
@@ -141,9 +142,9 @@ export default function EditTrip() {
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 8, paddingBottom: 48 },
-  label: { fontWeight: '600', marginTop: 10 },
-  hint: { color: '#666' },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 16 },
+  label: { fontFamily: F.semibold, marginTop: 10 },
+  hint: { color: C.muted },
+  input: { ...inputBase },
   multiline: { minHeight: 140, textAlignVertical: 'top' },
   buttons: { flexDirection: 'row', gap: 12, marginTop: 24 },
 });

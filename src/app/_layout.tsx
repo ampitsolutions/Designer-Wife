@@ -1,3 +1,10 @@
+import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold } from '@expo-google-fonts/dm-sans';
+import {
+  PlayfairDisplay_500Medium,
+  PlayfairDisplay_600SemiBold,
+  PlayfairDisplay_600SemiBold_Italic,
+} from '@expo-google-fonts/playfair-display';
+import { useFonts } from 'expo-font';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -5,20 +12,39 @@ import { useEffect } from 'react';
 import { ActivityIndicator, Dimensions, View } from 'react-native';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { isTabletSize } from '@/lib/layout';
+import { C, F } from '@/theme';
 
 function RootStack() {
   const { session, loading } = useAuth();
+  const [fontsLoaded, fontError] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    PlayfairDisplay_500Medium,
+    PlayfairDisplay_600SemiBold,
+    PlayfairDisplay_600SemiBold_Italic,
+  });
 
-  if (loading) {
+  if (loading || (!fontsLoaded && !fontError)) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}>
+        <ActivityIndicator color={C.accentText} />
       </View>
     );
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        headerStyle: { backgroundColor: C.bg },
+        headerShadowVisible: false,
+        headerTintColor: C.accentText,
+        headerTitleStyle: { fontFamily: F.display, fontSize: 20, color: C.ink },
+        headerBackButtonDisplayMode: 'minimal',
+        contentStyle: { backgroundColor: C.bg },
+      }}
+    >
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen

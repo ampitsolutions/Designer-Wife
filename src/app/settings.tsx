@@ -7,6 +7,7 @@ import { clearCloset } from '@/lib/closet';
 import { page } from '@/lib/layout';
 import { clearPeople, setManager, stepDown, usePeople } from '@/lib/people';
 import { supabase } from '@/lib/supabase';
+import { C, F } from '@/theme';
 
 export default function Settings() {
   const { me, people, profiles, grantedTo, nameOf } = usePeople();
@@ -90,9 +91,9 @@ export default function Settings() {
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 10, paddingBottom: 48 },
-  h: { fontSize: 18, fontWeight: '700' },
-  note: { color: '#666' },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  h: { fontSize: 18, fontFamily: F.display },
+  note: { color: C.muted },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.border },
   name: { fontSize: 16 },
-  link: { color: '#0a7aff', fontWeight: '600', padding: 4 },
+  link: { color: C.accentText, fontFamily: F.semibold, padding: 4 },
 });
