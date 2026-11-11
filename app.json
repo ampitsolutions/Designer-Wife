@@ -7,16 +7,18 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ampitsolutions.designerwife"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#F3ECE2",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ampitsolutions.designerwife"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,6 +31,15 @@
         {
           "photosPermission": "Designer Wife uses your photos to add clothes to your closet.",
           "cameraPermission": "Designer Wife uses the camera to photograph clothes for your closet."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#F3ECE2"
         }
       ]
     ],

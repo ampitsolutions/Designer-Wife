@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui';
 import { suggestTags } from '@/lib/ai';
 import { useAuth } from '@/lib/auth';
+import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { deletePhoto, pickPhoto, uploadPhoto, type PreparedPhoto } from '@/lib/photos';
 
@@ -59,6 +60,7 @@ export default function NewItem() {
     try {
       key = await uploadPhoto(session.user.id, photo);
       await createItem({ ...fieldsFromForm(values), photo_key: key });
+      refreshCloset(session.user.id);
       router.back();
     } catch (e) {
       if (key) await deletePhoto(key); // don't leave an orphaned photo

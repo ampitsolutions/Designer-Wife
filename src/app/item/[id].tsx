@@ -4,11 +4,18 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { fieldsFromForm, formFromItem, ItemForm, type ItemFormValues } from '@/components/ItemForm';
 import { Button } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
+import { refreshCloset } from '@/lib/closet';
 import { deleteItem, getItem, updateItem, type Item } from '@/lib/items';
 import { deletePhoto, photoUrls } from '@/lib/photos';
 
 export default function EditItem() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { session } = useAuth();
+  const done = () => {
+    if (session) refreshCloset(session.user.id);
+    router.back();
+  };
   const [item, setItem] = useState<Item | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [values, setValues] = useState<ItemFormValues | null>(null);
@@ -33,7 +40,7 @@ export default function EditItem() {
     setBusy('save');
     try {
       await updateItem(id, fieldsFromForm(values));
-      router.back();
+      done();
     } catch (e) {
       Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
       setBusy(null);
@@ -51,7 +58,7 @@ export default function EditItem() {
           try {
             await deleteItem(id);
             if (item?.photo_key) await deletePhoto(item.photo_key);
-            router.back();
+            done();
           } catch (e) {
             Alert.alert('Could not delete', e instanceof Error ? e.message : String(e));
             setBusy(null);

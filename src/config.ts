@@ -28,5 +28,11 @@ export const FORMALITY_LEVELS = ['Casual', 'Smart casual', 'Formal', 'Festive'] 
 
 export const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'] as const;
 
-// Name of the Supabase Edge Function that suggests tags from a photo.
-export const TAG_FUNCTION = 'tag-item';
+// Name of the Supabase Edge Function that does all AI work (tagging, outfit ideas, trip plans).
+export const AI_FUNCTION = 'stylist';
+
+// Calendar warns when the same outfit was used for another event within this many days.
+export const REPEAT_WINDOW_DAYS = 60;
+
+// Trips longer than this are refused (keeps AI requests and weather lookups small).
+export const MAX_TRIP_DAYS = 30;

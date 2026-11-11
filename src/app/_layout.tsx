@@ -23,6 +23,14 @@ function RootStack() {
           options={{ headerShown: true, title: 'New item', presentation: 'modal' }}
         />
         <Stack.Screen name="item/[id]" options={{ headerShown: true, title: 'Item' }} />
+        <Stack.Screen name="outfit/new" options={{ headerShown: true, title: 'New outfit' }} />
+        <Stack.Screen name="outfit/[id]" options={{ headerShown: true, title: 'Outfit' }} />
+        <Stack.Screen name="outfit/ideas" options={{ headerShown: true, title: 'Outfit ideas' }} />
+        <Stack.Screen name="trip/edit" options={{ headerShown: true, title: 'Trip', presentation: 'modal' }} />
+        <Stack.Screen name="trip/[id]" options={{ headerShown: true, title: 'Trip' }} />
+        <Stack.Screen name="trip/day/[id]" options={{ headerShown: true, title: 'Day' }} />
+        <Stack.Screen name="trip/packing/[id]" options={{ headerShown: true, title: 'Packing list' }} />
+        <Stack.Screen name="event/edit" options={{ headerShown: true, title: 'Event', presentation: 'modal' }} />
       </Stack.Protected>
       <Stack.Protected guard={!session}>
         <Stack.Screen name="sign-in" />

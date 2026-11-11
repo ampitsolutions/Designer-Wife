@@ -1,0 +1,57 @@
+# Publishes the app to your phone on every push to main (EAS Update, free tier).
+# Needs repo secrets: EXPO_TOKEN, EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY.
+# Does nothing until EXPO_TOKEN is set. See docs/PHONE_TESTING.md.
+name: Send update to phone
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check setup
+        id: check
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN secret not set - skipping. See docs/PHONE_TESTING.md" >> "$GITHUB_STEP_SUMMARY"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        if: steps.check.outputs.ready == 'true'
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install
+        if: steps.check.outputs.ready == 'true'
+        run: npm ci
+
+      - name: Typecheck
+        if: steps.check.outputs.ready == 'true'
+        run: npx tsc --noEmit
+
+      - name: Publish update
+        if: steps.check.outputs.ready == 'true'
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          eas update --branch main --non-interactive --message "$(git log -1 --pretty=%s)"
+          echo "Update published to branch **main**. Close and reopen the app on your phone to get it." >> "$GITHUB_STEP_SUMMARY"
