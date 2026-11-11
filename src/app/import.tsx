@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth';
 import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { boxToCrop, deletePhoto, pickMany, prepare, uploadPhoto, type PreparedPhoto, type RawPhoto } from '@/lib/photos';
+import { page } from '@/lib/layout';
 
 const MAX_SHOTS = 6;
 const MAX_PDF_BYTES = 8 * 1024 * 1024;
@@ -116,7 +117,7 @@ export default function ImportOrder() {
   if (lines && lines.length) {
     const count = lines.filter((l) => l.include).length;
     return (
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
         <Text style={styles.hint}>
           Found {lines.length} item{lines.length === 1 ? '' : 's'}. Untick anything you don't want, fix names, then add. You can add
           photos to items without one later.
@@ -162,7 +163,7 @@ export default function ImportOrder() {
   // ---------- inputs ----------
   const hasInput = shots.length > 0 || !!pdf || text.trim().length > 0;
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
       <Text style={styles.hint}>
         Add screenshots of your order (best: product photos get cropped automatically), a PDF receipt, or paste the order email's
         text. Mix and match.

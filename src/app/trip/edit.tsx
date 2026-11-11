@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { daysBetween } from '@/lib/dates';
 import { createTrip, deleteTrip, getTrip, updateTrip, type Trip } from '@/lib/trips';
 import { findPlace } from '@/lib/weather';
+import { page } from '@/lib/layout';
 
 /** New trip (no id) or edit trip (?id=…). */
 export default function EditTrip() {
@@ -108,7 +109,7 @@ export default function EditTrip() {
   const isOwner = !trip || trip.owner_id === session?.user.id;
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
       <Text style={styles.label}>Trip name</Text>
       <TextInput style={styles.input} placeholder="e.g. Lisbon anniversary" value={name} onChangeText={setName} />
 

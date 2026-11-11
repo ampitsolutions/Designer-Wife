@@ -6,6 +6,7 @@ import { Banner, Button } from '@/components/ui';
 import { suggestOutfits, type OutfitIdea } from '@/lib/ai';
 import { useAuth } from '@/lib/auth';
 import { useCloset } from '@/lib/closet';
+import { page } from '@/lib/layout';
 
 const EXAMPLES = ['Office day', 'Friend’s wedding (evening)', 'Weekend brunch', 'Diwali party', 'Date night'];
 
@@ -40,7 +41,7 @@ export default function OutfitIdeas() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
       <Text style={styles.label}>What's the occasion?</Text>
       <TextInput
         style={styles.input}

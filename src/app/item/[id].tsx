@@ -10,6 +10,7 @@ import { today } from '@/lib/dates';
 import { deleteItem, getItem, setItemPhoto, setItemStatus, updateItem, type Item } from '@/lib/items';
 import { deletePhoto, photoUrls, pickPhoto, uploadPhoto } from '@/lib/photos';
 import { listWear, logWear, unlogWear, wornText, type Wear } from '@/lib/wear';
+import { page } from '@/lib/layout';
 
 export default function EditItem() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -134,7 +135,7 @@ export default function EditItem() {
     .join(' · ');
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
       {item.status !== 'active' && (
         <Banner tone="warn">
           <Text style={{ flex: 1 }}>Set aside to {item.status}. Hidden from your closet and outfit ideas.</Text>

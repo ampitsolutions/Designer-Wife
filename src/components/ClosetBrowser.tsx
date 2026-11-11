@@ -12,12 +12,13 @@ import {
   View,
 } from 'react-native';
 import { CLOTHING_TYPES, SEASONS } from '@/config';
+import { gridColumns } from '@/lib/layout';
 import { activeFilterCount, distinctValues, emptyFilter, filterItems, type ClosetFilter } from '@/lib/filters';
 import type { Item } from '@/lib/items';
 import { Button } from './ui';
 import { ItemThumb } from './ItemThumb';
+import { page } from '@/lib/layout';
 
-const COLUMNS = 3;
 const GAP = 4;
 
 function Chips({
@@ -66,7 +67,9 @@ export function ClosetBrowser({
   header?: React.ReactElement;
   emptyText?: string;
 }) {
-  const { width } = useWindowDimensions();
+  const window = useWindowDimensions();
+  // Measure our own width (a sheet on iPad is narrower than the screen).
+  const [width, setWidth] = useState(window.width);
   const [filter, setFilter] = useState<ClosetFilter>(emptyFilter);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -75,10 +78,11 @@ export function ClosetBrowser({
   const occasions = useMemo(() => distinctValues(items, (i) => i.occasions).slice(0, 24), [items]);
   const usedTypes = useMemo(() => CLOTHING_TYPES.filter((t) => items.some((i) => i.type === t)), [items]);
   const nFilters = activeFilterCount(filter);
-  const size = (width - GAP * (COLUMNS + 1)) / COLUMNS;
+  const columns = gridColumns(width);
+  const size = Math.floor((width - GAP * (columns + 1)) / columns);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       <View style={styles.searchRow}>
         <TextInput
           style={styles.search}
@@ -115,7 +119,8 @@ export function ClosetBrowser({
       <FlatList
         data={shown}
         keyExtractor={(i) => i.id}
-        numColumns={COLUMNS}
+        key={`cols-${columns}`}
+        numColumns={columns}
         contentContainerStyle={{ padding: GAP, gap: GAP, flexGrow: 1, paddingBottom: 96 }}
         columnWrapperStyle={{ gap: GAP }}
         keyboardDismissMode="on-drag"
@@ -140,7 +145,7 @@ export function ClosetBrowser({
       />
 
       <Modal visible={showFilters} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowFilters(false)}>
-        <ScrollView contentContainerStyle={styles.sheet}>
+        <ScrollView contentContainerStyle={[styles.sheet, page]}>
           <Text style={styles.sheetTitle}>Filters</Text>
           <Text style={styles.label}>Type</Text>
           <Chips options={CLOTHING_TYPES} selected={filter.types} onToggle={(v) => setFilter({ ...filter, types: toggle(filter.types, v) })} />

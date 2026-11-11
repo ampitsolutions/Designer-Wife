@@ -1,7 +1,10 @@
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View } from 'react-native';
+import { useEffect } from 'react';
+import { ActivityIndicator, Dimensions, View } from 'react-native';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { isTabletSize } from '@/lib/layout';
 
 function RootStack() {
   const { session, loading } = useAuth();
@@ -43,6 +46,14 @@ function RootStack() {
 }
 
 export default function RootLayout() {
+  // Phones stay in portrait; iPads (and big Android tablets) can rotate.
+  useEffect(() => {
+    const { width, height } = Dimensions.get('screen');
+    if (!isTabletSize(width, height)) {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <StatusBar style="dark" />

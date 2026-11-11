@@ -9,6 +9,7 @@ import { logWear } from '@/lib/wear';
 import { ClosetBrowser } from './ClosetBrowser';
 import { ItemThumb } from './ItemThumb';
 import { Button } from './ui';
+import { page } from '@/lib/layout';
 
 /**
  * Create or edit an outfit. Pass `outfit` to edit; `initial` to prefill a new one (e.g. from AI ideas).
@@ -88,7 +89,7 @@ export function OutfitEditor({
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
         <View style={styles.grid}>
           {selected.map((it) => (
             <Pressable key={it.id} disabled={readOnly} onPress={() => toggle(it.id)}>

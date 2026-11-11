@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/auth';
 import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { deletePhoto, pickMany, prepare, uploadPhoto, type RawPhoto } from '@/lib/photos';
+import { page } from '@/lib/layout';
 
 type Status = 'waiting' | 'working' | 'done' | 'no-tags' | 'failed';
 type Row = { key: string; raw: RawPhoto; status: Status; itemId?: string; name?: string; error?: string };
@@ -100,7 +101,7 @@ export default function BulkAdd() {
         <FlatList
           data={rows}
           keyExtractor={(r) => r.key}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, page]}
           ListHeaderComponent={
             <View style={{ gap: 10, marginBottom: 8 }}>
               {running ? (

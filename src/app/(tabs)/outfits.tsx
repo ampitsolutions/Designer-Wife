@@ -6,6 +6,7 @@ import { Empty, Fab } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { ensureUrls } from '@/lib/closet';
 import { listOutfits, setFavourite, type Outfit } from '@/lib/outfits';
+import { page } from '@/lib/layout';
 
 export default function OutfitsScreen() {
   const { session } = useAuth();
@@ -56,7 +57,7 @@ export default function OutfitsScreen() {
       <FlatList
         data={data}
         keyExtractor={(d) => d.key}
-        contentContainerStyle={{ padding: 12, gap: 12, flexGrow: 1, paddingBottom: 96 }}
+        contentContainerStyle={{ ...page, padding: 12, gap: 12, flexGrow: 1, paddingBottom: 96 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         ListHeaderComponent={
           <Pressable style={styles.ideas} onPress={() => router.push('/outfit/ideas')}>

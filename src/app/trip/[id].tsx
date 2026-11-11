@@ -24,6 +24,7 @@ import {
   type TripDay,
 } from '@/lib/trips';
 import { describe, tripWeather, weatherLine } from '@/lib/weather';
+import { page } from '@/lib/layout';
 
 export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -159,7 +160,7 @@ export default function TripDetail() {
           ),
         }}
       />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={[styles.container, page]}>
         <Text style={styles.meta}>
           {[trip.place_label || trip.destination, formatRange(trip.start_date, trip.end_date)].filter(Boolean).join(' · ')}
         </Text>

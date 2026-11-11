@@ -15,6 +15,7 @@ import { useAuth } from '@/lib/auth';
 import { refreshCloset } from '@/lib/closet';
 import { createItem } from '@/lib/items';
 import { deletePhoto, pickPhoto, uploadPhoto, type PreparedPhoto } from '@/lib/photos';
+import { page } from '@/lib/layout';
 
 type AiState = 'idle' | 'working' | 'done' | 'failed';
 
@@ -70,7 +71,7 @@ export default function NewItem() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
       {photo ? (
         <Image source={{ uri: photo.uri }} style={styles.photo} contentFit="contain" />
       ) : (

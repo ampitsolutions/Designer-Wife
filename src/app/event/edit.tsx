@@ -9,6 +9,7 @@ import { ensureUrls } from '@/lib/closet';
 import { today } from '@/lib/dates';
 import { createEvent, deleteEvent, findRepeats, getEvent, listEvents, repeatText, updateEvent, type CalendarEvent } from '@/lib/events';
 import { listOutfits, type Outfit } from '@/lib/outfits';
+import { page } from '@/lib/layout';
 
 /** New event (no id) or edit (?id=…). */
 export default function EditEvent() {
@@ -99,7 +100,7 @@ export default function EditEvent() {
   return (
     <>
       <Stack.Screen options={{ title: id ? 'Event' : 'New event' }} />
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
         <Text style={styles.label}>Event</Text>
         <TextInput style={styles.input} placeholder="e.g. Priya's wedding reception" value={title} onChangeText={setTitle} />
 
@@ -153,7 +154,7 @@ export default function EditEvent() {
         <FlatList
           data={outfits}
           keyExtractor={(o) => o.id}
-          contentContainerStyle={{ padding: 12, gap: 10 }}
+          contentContainerStyle={{ ...page, padding: 12, gap: 10 }}
           renderItem={({ item: o }) => {
             const r = date ? findRepeats(all, o.id, date, id)[0] : undefined;
             return (

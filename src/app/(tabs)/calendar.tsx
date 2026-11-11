@@ -7,6 +7,7 @@ import { ensureUrls } from '@/lib/closet';
 import { formatDate, today } from '@/lib/dates';
 import { findRepeats, listEvents, repeatText, type CalendarEvent } from '@/lib/events';
 import { listOutfits, type Outfit } from '@/lib/outfits';
+import { page } from '@/lib/layout';
 
 const monthTitle = (d: string) =>
   new Date(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
@@ -52,6 +53,7 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={[page, { paddingHorizontal: 12 }]}>
       <View style={styles.toggle}>
         {(['Upcoming', `Past${pastCount ? ` (${pastCount})` : ''}`] as const).map((label, i) => {
           const on = showPast === (i === 1);
@@ -62,10 +64,11 @@ export default function CalendarScreen() {
           );
         })}
       </View>
+      </View>
       <SectionList
         sections={sections}
         keyExtractor={(e) => e.id}
-        contentContainerStyle={{ padding: 12, paddingBottom: 96, flexGrow: 1 }}
+        contentContainerStyle={{ ...page, padding: 12, paddingBottom: 96, flexGrow: 1 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         renderSectionHeader={({ section }) => <Text style={styles.section}>{section.title}</Text>}
         renderItem={({ item: e }) => {
@@ -98,7 +101,7 @@ export default function CalendarScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  toggle: { flexDirection: 'row', margin: 12, marginBottom: 0, backgroundColor: '#f2f2f2', borderRadius: 10, padding: 3 },
+  toggle: { flexDirection: 'row', marginTop: 12, backgroundColor: '#f2f2f2', borderRadius: 10, padding: 3 },
   seg: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8 },
   segOn: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } },
   segText: { color: '#666', fontWeight: '600' },

@@ -5,6 +5,7 @@ import { Empty, Fab } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { formatRange, today } from '@/lib/dates';
 import { listTrips, type Trip } from '@/lib/trips';
+import { page } from '@/lib/layout';
 
 export default function TripsScreen() {
   const { session } = useAuth();
@@ -44,7 +45,7 @@ export default function TripsScreen() {
       <FlatList
         data={rows}
         keyExtractor={(r) => r.key}
-        contentContainerStyle={{ padding: 12, gap: 10, flexGrow: 1, paddingBottom: 96 }}
+        contentContainerStyle={{ ...page, padding: 12, gap: 10, flexGrow: 1, paddingBottom: 96 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         renderItem={({ item: r }) => {
           if (!r.trip) return <Text style={styles.section}>Past trips</Text>;

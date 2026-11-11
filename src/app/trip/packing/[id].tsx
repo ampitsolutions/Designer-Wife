@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { useCloset } from '@/lib/closet';
 import { listProfiles, profileName, type Profile } from '@/lib/profiles';
 import { addPacking, deletePacking, listPacking, setPacked, type PackingItem } from '@/lib/trips';
+import { page } from '@/lib/layout';
 
 export default function PackingList() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -91,7 +92,7 @@ export default function PackingList() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.addRow}>
+      <View style={[styles.addRow, page]}>
         <TextInput
           style={[styles.input, { flex: 1 }]}
           placeholder="Add something to pack"
@@ -109,7 +110,7 @@ export default function PackingList() {
       <SectionList
         sections={sections}
         keyExtractor={(l) => l.id}
-        contentContainerStyle={{ padding: 12, paddingBottom: 48, flexGrow: 1 }}
+        contentContainerStyle={{ ...page, padding: 12, paddingBottom: 48, flexGrow: 1 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         renderSectionHeader={({ section }) => <Text style={styles.section}>{section.title}</Text>}
         renderItem={({ item: line }) => {

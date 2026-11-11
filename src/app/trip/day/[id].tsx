@@ -10,6 +10,7 @@ import { formatDate } from '@/lib/dates';
 import { supabase } from '@/lib/supabase';
 import { listDayItems, setMyDayItems, updateDay, type TripDay } from '@/lib/trips';
 import { weatherLine } from '@/lib/weather';
+import { page } from '@/lib/layout';
 
 /** One trip day: my outfit for the day and what's planned. */
 export default function TripDayScreen() {
@@ -72,7 +73,7 @@ export default function TripDayScreen() {
   return (
     <>
       <Stack.Screen options={{ title: formatDate(day.day_date) }} />
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, page]} keyboardShouldPersistTaps="handled">
         {day.weather && <Text style={styles.weather}>{weatherLine(day.weather)}</Text>}
         {day.plan ? <Text style={styles.note}>{day.plan}</Text> : null}
 

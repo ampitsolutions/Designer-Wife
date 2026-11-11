@@ -11,6 +11,7 @@ import { declutterSuggestions } from '@/lib/declutter';
 import { deleteItem, setItemStatus, type Item, type ItemStatus } from '@/lib/items';
 import { deletePhoto } from '@/lib/photos';
 import { logWear, useWear } from '@/lib/wear';
+import { page } from '@/lib/layout';
 
 type Tab = 'suggest' | 'donate' | 'sell';
 
@@ -80,6 +81,7 @@ export default function Declutter() {
 
   return (
     <View style={styles.container}>
+      <View style={[page, { paddingHorizontal: 12 }]}>
       <View style={styles.tabs}>
         {tabs.map((t) => (
           <Pressable key={t.key} style={[styles.tab, tab === t.key && styles.tabOn]} onPress={() => setTab(t.key)}>
@@ -90,10 +92,11 @@ export default function Declutter() {
           </Pressable>
         ))}
       </View>
+      </View>
       <FlatList
         data={data}
         keyExtractor={(d) => d.item.id}
-        contentContainerStyle={{ padding: 12, gap: 14, flexGrow: 1, paddingBottom: 48 }}
+        contentContainerStyle={{ ...page, padding: 12, gap: 14, flexGrow: 1, paddingBottom: 48 }}
         renderItem={({ item: { item, reason } }) => (
           <View style={styles.row}>
             <Pressable onPress={() => router.push(`/item/${item.id}`)}>
@@ -147,7 +150,7 @@ export default function Declutter() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  tabs: { flexDirection: 'row', margin: 12, marginBottom: 0, backgroundColor: '#f2f2f2', borderRadius: 10, padding: 3 },
+  tabs: { flexDirection: 'row', marginTop: 12, backgroundColor: '#f2f2f2', borderRadius: 10, padding: 3 },
   tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8 },
   tabOn: { backgroundColor: '#fff' },
   tabText: { color: '#666', fontWeight: '600' },

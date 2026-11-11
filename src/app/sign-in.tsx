@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { APP_NAME } from '@/config';
 import { isConfigured, supabase } from '@/lib/supabase';
+import { page } from '@/lib/layout';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -31,6 +32,7 @@ export default function SignIn() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <View style={[page, styles.inner]}>
       <Text style={styles.title}>{APP_NAME}</Text>
       {!isConfigured && (
         <Text style={styles.error}>Supabase is not configured. Add your keys to .env.</Text>
@@ -60,12 +62,14 @@ export default function SignIn() {
       >
         {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in</Text>}
       </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, gap: 12, backgroundColor: '#fff' },
+  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
+  inner: { maxWidth: 420, gap: 12 },
   title: { fontSize: 32, fontWeight: '700', textAlign: 'center', marginBottom: 24 },
   input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 14, fontSize: 16 },
   button: { backgroundColor: '#111', borderRadius: 10, padding: 16, alignItems: 'center' },
